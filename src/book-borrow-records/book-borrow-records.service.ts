@@ -39,7 +39,7 @@ export class BookBorrowRecordsService {
       relations: { user: true, genres: true },
     });
 
-    const maximumBorrowDay = this.rulesService.getRule('BORROW_MAX');
+    const maximumBorrowDay = this.rulesService.getRule('DUE_BY_DAYS');
     if (!maximumBorrowDay)
       throw new HttpException(
         'There is an error occurred',
@@ -51,21 +51,25 @@ export class BookBorrowRecordsService {
       books.length != 0 &&
       (await this.businessValidateService.IsUserAbleToMakeBorrowRequest(user))
     ) {
-      let resultPromises: Promise<DeepPartial<BookBorrowRecord>>[] = [];
-
-      const now = new Date();
-      let newSession = await this.bookBorrowSessionsRepository.save({});
-
       for (let index in books) {
         if (!this.businessValidateService.isBookAvailable(books[index], userId))
           throw new HttpException(
             { bookId: books[index].bookId, message: 'book not available' },
             HttpStatus.CONFLICT,
           );
+      }
+
+      let resultPromises: Promise<DeepPartial<BookBorrowRecord>>[] = [];
+
+      const now = new Date();
+      let newSession = await this.bookBorrowSessionsRepository.save({});
+
+      for (let index in books) {
         this.makeBookUnavailableForUser(
           books[index],
           user,
           parseInt(maximumBorrowDay),
+          now,
         );
         resultPromises = [
           ...resultPromises,
@@ -119,10 +123,11 @@ export class BookBorrowRecordsService {
     book: Book,
     user: User,
     borrowDays: number,
+    borrowWhen: Date,
   ) {
     book.user = user;
-    let today = new Date();
-    let dueDay = new Date();
+    let today = borrowWhen;
+    let dueDay = new Date(borrowWhen.getTime());
     book.borrowedDate = today;
     dueDay.setDate(book.borrowedDate.getDate() + borrowDays);
     book.dueDate = dueDay;

@@ -1,8 +1,15 @@
 import { Controller } from '@nestjs/common';
-import { Body, Patch } from '@nestjs/common/decorators';
+import { Body, Patch, UseGuards } from '@nestjs/common/decorators';
 import UpdateRuleDto from './dto/update-rule.dto';
 import { RulesService } from './rules.service';
+import { Roles } from 'src/auth/authorization/roles.decorator';
+import { JwtAuthGuard } from 'src/auth/authentication/jwt-auth.guard';
+import { Role } from 'src/auth/authorization/role.enum';
+import { RolesGuard } from 'src/auth/authorization/roles.guard';
 
+
+@Roles(Role.Admin)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('rules')
 export class RulesController {
   constructor(private rulesService: RulesService) {}
@@ -41,6 +48,16 @@ export class RulesController {
   ) {
     await this.rulesService.updateRule(
       'VALID_PERIOD_BY_DAY_OF_USER_ACCOUNT',
+      updateRuleDto.value,
+    );
+  }
+
+  @Patch('/due_by_days')
+  async updateDueByDaysOfBorrow(
+    @Body() updateRuleDto: UpdateRuleDto,
+  ) {
+    await this.rulesService.updateRule(
+      'DUE_BY_DAYS',
       updateRuleDto.value,
     );
   }

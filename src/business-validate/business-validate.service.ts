@@ -64,8 +64,9 @@ export default class BusinessValidateService {
   static isBookReserved(book: Book): boolean {
     return (
       book.borrowedDate == null &&
+      book.reservedDate != null &&
       book.dueDate != null &&
-      book.dueDate.getTime() > new Date().getTime()
+      book.dueDate.getTime() > Date.now()
     );
   }
 

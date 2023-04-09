@@ -29,12 +29,15 @@ export class ReserveService {
         (this.busnessValidateService.isBookNotBorrowedAndNotReserved(book) ||
           this.busnessValidateService.isBookReserveForThisUser(userId, book))
       ) {
-        let reserveDay = this.rulesService.getRule('RESERVE_DAY');
+        const reserveDay = this.rulesService.getRule('RESERVE_DAY');
         if (!reserveDay)
           throw new HttpException('Error', HttpStatus.BAD_GATEWAY);
-        let reserveDayValue = parseInt(reserveDay);
 
-        book.dueDate = new Date();
+        const reserveDayValue = parseInt(reserveDay);
+
+        let now = new Date();
+        book.reservedDate = now;
+        book.dueDate = new Date(now.getTime());
         book.dueDate.setDate(book.dueDate.getDate() + reserveDayValue);
         book.user = user;
 
@@ -57,6 +60,7 @@ export class ReserveService {
     if (this.busnessValidateService.isBookReserveForThisUser(userId, book)) {
       book.user = null;
       book.dueDate = null;
+      book.reservedDate = null;
       await this.booksRepository.save(book);
     }
   }

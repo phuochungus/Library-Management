@@ -32,7 +32,10 @@ export default class Book implements TimeStampImp {
   @Column()
   price: number;
 
-  @ManyToOne(() => User, (user) => user.books, { nullable: true })
+  @ManyToOne(() => User, (user) => user.books, {
+    nullable: true,
+    cascade: true,
+  })
   user: User | null;
 
   @ManyToMany(() => Genre, (Genre) => Genre.books, {
@@ -52,6 +55,9 @@ export default class Book implements TimeStampImp {
 
   @Column({ type: 'datetime', nullable: true })
   borrowedDate: Date | null;
+
+  @Column({ type: 'datetime', nullable: true })
+  reservedDate: Date | null;
 
   @Column({ type: 'datetime', nullable: true })
   dueDate: Date | null;

@@ -1,13 +1,20 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { InjectEntityManager } from '@nestjs/typeorm';
+import {
+  Injectable,
+  OnModuleInit,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import Rule from 'src/entities/Rule';
-import { MongoEntityManager } from 'typeorm';
+import { MongoEntityManager, MongoRepository } from 'typeorm';
 
 @Injectable()
 export class RulesService implements OnModuleInit {
   constructor(
     @InjectEntityManager('mongoDB')
     private entityManager: MongoEntityManager,
+    @InjectRepository(Rule, 'mongoDB')
+    private rulesRepository: MongoRepository<Rule>,
   ) {}
 
   async onModuleInit() {
@@ -51,13 +58,15 @@ export class RulesService implements OnModuleInit {
   }
 
   async updateRule(about: string, value: string) {
-    for (let i in this.currentRules) {
-      if (this.currentRules[i].about == about) {
-        this.currentRules[i].value = value;
-        await this.entityManager.save(this.currentRules[i]);
-        return this.currentRules[i];
-      }
-    }
-    return null;
+    let rule = await this.rulesRepository.findOne({
+      where: {
+        about,
+      },
+    });
+    if (!rule) throw new HttpException('Bad gateway', HttpStatus.BAD_GATEWAY);
+
+    rule.value = value;
+
+    await this.rulesRepository.save(rule);
   }
 }
