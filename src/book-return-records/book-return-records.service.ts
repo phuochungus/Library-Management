@@ -46,18 +46,20 @@ export class BookReturnRecordsService {
           HttpStatus.BAD_GATEWAY,
         );
 
+      for (let book of books) {
+        if (!this.businessValidateService.isBookBorrowedByUser(book, user))
+          throw new HttpException(
+            { bookId: book.bookId, message: 'book not borrow by user' },
+            HttpStatus.CONFLICT,
+          );
+      }
+
       let resultPromises: Promise<DeepPartial<BookReturnRecord>>[] = [];
       let totalSessionFine = 0;
       let newSession = await this.bookReturnSessionsRepository.save({});
       const now = new Date();
+
       for (let index in books) {
-        if (
-          !this.businessValidateService.isBookBorrowedByUser(books[index], user)
-        )
-          throw new HttpException(
-            { bookId: books[index].bookId, message: 'book not borrow by user' },
-            HttpStatus.CONFLICT,
-          );
         let book = books[index];
         let passDueDays = this.calculatePassDueDays(book);
         let fine = this.calculateFine(passDueDays, parseInt(finePerDay));
@@ -71,12 +73,15 @@ export class BookReturnRecordsService {
             userId: user.userId,
             fine,
             passDue: passDueDays,
-            sessionId: newSession._id.toString(),
+            returnSessionId: newSession._id,
             createdDate: now,
+            authorName: books[index].author,
+            bookName: books[index].name,
+            genreNames: books[index].genres.map((e) => e.name),
           }),
         ];
 
-        this.bookBorrowReturnHistoriesRepository
+        await this.bookBorrowReturnHistoriesRepository
           .findOne({
             where: {
               bookId: books[index].bookId,
@@ -84,12 +89,14 @@ export class BookReturnRecordsService {
               returnDate: null,
             },
           })
-          .then((queryResult: BookBorrowReturnHistory) => {
+          .then(async (queryResult: BookBorrowReturnHistory | null) => {
+            if (!queryResult)
+              throw new HttpException('Conflict', HttpStatus.CONFLICT);
             queryResult.returnDate = now;
-            queryResult.returnSessionId = newSession._id.toString();
+            queryResult.returnSessionId = newSession._id;
             queryResult.fine = fine;
             queryResult.numberOfPassDueDays = passDueDays;
-            this.bookBorrowReturnHistoriesRepository.save(queryResult);
+            await this.bookBorrowReturnHistoriesRepository.save(queryResult);
           });
 
         if (parseInt(index) == books.length - 1) {

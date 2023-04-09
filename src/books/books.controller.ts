@@ -31,7 +31,13 @@ export class BooksController {
 
   @Get()
   async findAll(@Query() queryBookDto: QueryBookDTO) {
-    if (!queryBookDto.keywords && !queryBookDto.name && !queryBookDto.author && !queryBookDto.genre && !queryBookDto.page)
+    if (
+      !queryBookDto.keywords &&
+      !queryBookDto.name &&
+      !queryBookDto.author &&
+      !queryBookDto.genre &&
+      !queryBookDto.page
+    )
       return await this.booksService.findAll();
     else
       return await this.booksService.findAllWithQueryParams(
@@ -56,7 +62,7 @@ export class BooksController {
     await this.booksService.update(id, updateBookDto);
   }
 
-  @Patch('/reserve')
+  @Post('/reserve')
   async reserve(@Body() reserveBookDto: ReserveBookDto) {
     await this.reserveService.ReserveBook(
       reserveBookDto.userId,
@@ -64,12 +70,12 @@ export class BooksController {
     );
   }
 
-  @Delete('book/:bookId/cancel_reserve')
-  async cancelReserve(
-    @Body() reserveBookDto: ReserveBookDto,
-    @Param('bookId', ParseUUIDPipe) bookId: string,
-  ) {
-    await this.reserveService.cancelReserve(reserveBookDto.userId, bookId);
+  @Delete('/reserve')
+  async cancelReserve(@Body() reserveBookDto: ReserveBookDto) {
+    await this.reserveService.cancelReserve(
+      reserveBookDto.userId,
+      reserveBookDto.bookId,
+    );
   }
 
   @Delete('book/:id')

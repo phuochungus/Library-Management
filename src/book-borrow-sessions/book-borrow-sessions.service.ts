@@ -1,28 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import mongoose from 'mongoose';
-import BookReturnSession from 'src/entities/BookReturnSession';
+import BookBorrowSession from 'src/entities/BookBorrowSession';
 import { MongoRepository, ObjectLiteral } from 'typeorm';
+import mongoose from 'mongoose';
 
 @Injectable()
-export class BookReturnSessionsService {
+export class BookBorrowSessionsService {
   constructor(
-    @InjectRepository(BookReturnSession, 'mongoDB')
-    private bookReturnSessionsRepository: MongoRepository<BookReturnSession>,
+    @InjectRepository(BookBorrowSession, 'mongoDB')
+    private bookBorrowSessionsRepository: MongoRepository<BookBorrowSession>,
   ) {}
 
   async findAll() {
-    return await this.bookReturnSessionsRepository.find({
+    return await this.bookBorrowSessionsRepository.find({
       order: { createdDate: 'DESC' },
     });
   }
+
   async findAllWithQueryParams(
     name: string = '',
     username: string = '',
     createdDateString: string | undefined,
   ) {
     let aggregateArray: ObjectLiteral[];
-
     if (createdDateString) {
       const createdDate = new Date(createdDateString);
       aggregateArray = [
@@ -73,13 +73,13 @@ export class BookReturnSessionsService {
       ];
     }
 
-    return await this.bookReturnSessionsRepository
+    return await this.bookBorrowSessionsRepository
       .aggregate(aggregateArray)
       .toArray();
   }
 
   async findOne(sessionId: string) {
-    const session = await this.bookReturnSessionsRepository
+    const session = await this.bookBorrowSessionsRepository
       .aggregate([
         {
           $match: {
@@ -88,9 +88,9 @@ export class BookReturnSessionsService {
         },
         {
           $lookup: {
-            from: 'book_return_record',
+            from: 'book_borrow_record',
             localField: '_id',
-            foreignField: 'returnSessionId',
+            foreignField: 'borrowSessionId',
             as: 'records',
           },
         },

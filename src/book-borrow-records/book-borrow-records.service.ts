@@ -5,17 +5,10 @@ import Book from 'src/entities/Book';
 import BookBorrowRecord from 'src/entities/BookBorrowRecord';
 import User from 'src/entities/User';
 import { RulesService } from 'src/rules/rules.service';
-import {
-  DeepPartial,
-  In,
-  MongoRepository,
-  ObjectID,
-  Repository,
-} from 'typeorm';
+import { DeepPartial, In, MongoRepository, Repository } from 'typeorm';
 import { CreateBookBorrowRecordDto } from './dto/create-book-borrow-record.dto';
-import { v4 as uuidv4 } from 'uuid';
-import { use } from 'passport';
 import BookBorrowReturnHistory from 'src/entities/BookBorrowReturnHistory';
+import BookBorrowSession from 'src/entities/BookBorrowSession';
 
 @Injectable()
 export class BookBorrowRecordsService {
@@ -24,6 +17,8 @@ export class BookBorrowRecordsService {
     private bookBorrowRecordsRepository: MongoRepository<BookBorrowRecord>,
     @InjectRepository(BookBorrowReturnHistory, 'mongoDB')
     private bookBorrowReturnHistoriesRepository: MongoRepository<BookBorrowReturnHistory>,
+    @InjectRepository(BookBorrowSession, 'mongoDB')
+    private bookBorrowSessionsRepository: MongoRepository<BookBorrowSession>,
     @InjectRepository(Book) private booksRepository: Repository<Book>,
     @InjectRepository(User) private usersRepository: Repository<User>,
     private businessValidateService: BusinessValidateService,
@@ -41,7 +36,7 @@ export class BookBorrowRecordsService {
     });
     let books = await this.booksRepository.find({
       where: { bookId: In(bookIds) },
-      relations: { user: true },
+      relations: { user: true, genres: true },
     });
 
     const maximumBorrowDay = this.rulesService.getRule('BORROW_MAX');
@@ -59,6 +54,7 @@ export class BookBorrowRecordsService {
       let resultPromises: Promise<DeepPartial<BookBorrowRecord>>[] = [];
 
       const now = new Date();
+      let newSession = await this.bookBorrowSessionsRepository.save({});
 
       for (let index in books) {
         if (!this.businessValidateService.isBookAvailable(books[index], userId))
@@ -71,14 +67,16 @@ export class BookBorrowRecordsService {
           user,
           parseInt(maximumBorrowDay),
         );
-        const sessionId = uuidv4();
         resultPromises = [
           ...resultPromises,
           this.bookBorrowRecordsRepository.save({
             bookId: bookIds[index],
             userId,
-            sessionId,
+            borrowSessionId: newSession._id,
             createdDate: now,
+            bookName: books[index].name,
+            authorName: books[index].author,
+            genreNames: books[index].genres.map((e) => e.name),
           }),
         ];
         this.bookBorrowReturnHistoriesRepository.save({
@@ -87,17 +85,24 @@ export class BookBorrowRecordsService {
           bookId: books[index].bookId,
           bookName: books[index].name,
           borrowDate: now,
+          borrowSessionId: newSession._id,
           returnDate: null,
           returnSessionId: null,
           fine: null,
           numberOfPassDueDays: null,
         });
+        if (parseInt(index) == books.length - 1) {
+          newSession.username = user.username;
+          newSession.name = user.name;
+          newSession.quantity = books.length;
+          await this.bookBorrowSessionsRepository.save(newSession);
+        }
       }
 
       await this.booksRepository.save(books);
       await this.usersRepository.save(user);
       let result;
-      Promise.all(resultPromises)
+      await Promise.all(resultPromises)
         .then((records) => {
           result = records;
         })

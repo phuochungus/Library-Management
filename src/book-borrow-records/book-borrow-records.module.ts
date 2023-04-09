@@ -9,11 +9,12 @@ import User from 'src/entities/User';
 import Rule from 'src/entities/Rule';
 import { RulesModule } from 'src/rules/rules.module';
 import BookBorrowReturnHistory from 'src/entities/BookBorrowReturnHistory';
+import BookBorrowSession from 'src/entities/BookBorrowSession';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
-      [BookBorrowRecord, BookBorrowReturnHistory],
+      [BookBorrowRecord, BookBorrowReturnHistory, BookBorrowSession],
       'mongoDB',
     ),
     TypeOrmModule.forFeature([Book, User]),

@@ -91,7 +91,7 @@ export class BooksService {
       name: In(updateGenreNamesDto),
     });
 
-    book.genres = Promise.resolve(genresWillBeResolve);
+    book.genres = genresWillBeResolve;
     await this.booksRepository.save(book);
   }
 }

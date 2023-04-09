@@ -36,14 +36,14 @@ export default class Book implements TimeStampImp {
   user: User | null;
 
   @ManyToMany(() => Genre, (Genre) => Genre.books, {
-    lazy: true,
+    eager: true,
   })
   @JoinTable({
     name: 'book_genre',
     joinColumn: { name: 'bookId', referencedColumnName: 'bookId' },
     inverseJoinColumn: { name: 'genreId', referencedColumnName: 'genreId' },
   })
-  genres: Promise<Genre[]>;
+  genres: Genre[];
 
   @ManyToMany(() => User, (user) => user.bookShelf, {
     lazy: true,

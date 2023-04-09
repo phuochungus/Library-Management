@@ -27,8 +27,11 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { MailService } from './mail/mail.service';
 import { MailModule } from './mail/mail.module';
 import { BookReturnSessionsModule } from './book-return-sessions/book-return-sessions.module';
+import { BookBorrowSessionsModule } from './book-borrow-sessions/book-borrow-sessions.module';
 import BookReturnSession from './entities/BookReturnSession';
 import BookBorrowReturnHistory from './entities/BookBorrowReturnHistory';
+import BookBorrowSession from './entities/BookBorrowSession';
+import { BookBorrowReturnHistoriesModule } from './book-borrow-return-histories/book-borrow-return-histories.module';
 
 @Module({
   imports: [
@@ -45,6 +48,10 @@ import BookBorrowReturnHistory from './entities/BookBorrowReturnHistory';
     AuthModule,
     BookShelfModule,
     ReportsModule,
+    MailModule,
+    BookReturnSessionsModule,
+    BookBorrowSessionsModule,
+    BookBorrowReturnHistoriesModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.MYSQL_HOST || 'localhost',
@@ -71,6 +78,7 @@ import BookBorrowReturnHistory from './entities/BookBorrowReturnHistory';
         BookReturnRecord,
         FineReceipt,
         Rule,
+        BookBorrowSession,
         BookReturnSession,
         BookBorrowReturnHistory,
       ],
@@ -84,8 +92,6 @@ import BookBorrowReturnHistory from './entities/BookBorrowReturnHistory';
         },
       },
     }),
-    MailModule,
-    BookReturnSessionsModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailService],

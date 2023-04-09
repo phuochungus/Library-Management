@@ -122,8 +122,10 @@ export class ReportsService {
         {
           $match: {
             numberOfPassDueDays: {
-              $ne: 0,
+              $gte: 1,
             },
+            month: borrowMonth,
+            year: borrowYear,
           },
         },
         {

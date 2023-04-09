@@ -1,11 +1,10 @@
-import { Collection, ObjectId } from 'mongoose';
 import { Column, Entity, ObjectIdColumn } from 'typeorm';
-import { NIL } from 'uuid';
+import { ObjectID } from 'mongodb';
 
 @Entity()
 export default class BookBorrowReturnHistory {
   @ObjectIdColumn()
-  _id: ObjectId;
+  _id: ObjectID;
 
   @Column()
   userId: string;
@@ -22,11 +21,14 @@ export default class BookBorrowReturnHistory {
   @Column()
   borrowDate: Date;
 
+  @Column()
+  borrowSessionId: ObjectID;
+
   @Column({ default: null })
   returnDate: Date | null;
 
   @Column({ default: null })
-  returnSessionId: string | null;
+  returnSessionId: ObjectID | null;
 
   @Column({ default: null })
   fine: number | null;

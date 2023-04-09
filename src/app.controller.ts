@@ -11,9 +11,8 @@ import { UsersService } from './users/users.service';
 @Controller()
 export class AppController {
   constructor(
-    private readonly appService: AppService,
+    private appService: AppService,
     private authService: AuthService,
-    private usersService: UsersService,
   ) {}
 
   @Get()
