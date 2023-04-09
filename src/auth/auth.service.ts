@@ -17,7 +17,7 @@ export class AuthService {
   async validateUser(username: string, password: string) {
     const user = await this.usersRepository.findOne({
       where: { username },
-      select: { username: true, password: true },
+      select: { username: true, password: true, userId: true },
     });
     if (user) {
       if (bcrypt.compareSync(password, user.password)) {
@@ -28,7 +28,11 @@ export class AuthService {
 
     const admin = await this.adminsRepository.findOne({
       where: { username },
-      select: { username: true, password: true },
+      select: {
+        username: true,
+        password: true,
+        adminId: true,
+      },
     });
     if (admin) {
       if (bcrypt.compareSync(password, admin.password)) {

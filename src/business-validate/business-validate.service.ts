@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import Book from 'src/entities/Book';
 import User from 'src/entities/User';
 import { RulesService } from 'src/rules/rules.service';
@@ -13,7 +13,7 @@ export default class BusinessValidateService {
 
     if (
       this.isUserAgeValid(user.birth) &&
-      !this.isUserReachBorrowLimit(userBooks.length) &&
+      !this.isUserReachBorrowLimit(userBooks) &&
       this.isUserAccountValid(user.validUntil) &&
       this.isUserNotPassDueAnyBook(userBooks)
     )
@@ -36,13 +36,26 @@ export default class BusinessValidateService {
     let maxAgeValues = this.rulesListenerService.getRule('MAXIMUM_AGE');
     if (minAgeValues && maxAgeValues)
       return parseInt(minAgeValues) <= age && age <= parseInt(maxAgeValues);
-    return false;
+    throw new HttpException('Bad gatewat', HttpStatus.BAD_GATEWAY);
   }
 
-  isUserReachBorrowLimit(numberOfBook: number): boolean {
+  isUserReachBorrowLimit(books: Book[]): boolean {
     const borrowMaxValue = this.rulesListenerService.getRule('BORROW_MAX');
-    if (!borrowMaxValue) return false;
-    return numberOfBook >= parseInt(borrowMaxValue);
+    const borrowDueValue = this.rulesListenerService.getRule('DUE_BY_DAYS');
+    if (borrowMaxValue && borrowDueValue) {
+      const borrowMax = parseInt(borrowMaxValue);
+      const borrowDueByDays = parseInt(borrowDueValue);
+      const DAY_IN_MILISECOND = 24 * 60 * 60 * 1000;
+      let count = 0;
+      const dateInPast = new Date(
+        Date.now() - borrowDueByDays * DAY_IN_MILISECOND,
+      );
+      for (let book of books) {
+        let date = book.borrowedDate || book.reservedDate;
+        if (date!.getTime() > dateInPast.getTime()) count++;
+      }
+      return count >= borrowMax;
+    } else throw new HttpException('Bad gatewat', HttpStatus.BAD_GATEWAY);
   }
 
   isUserAccountValid(validUntil: Date): boolean {
@@ -87,7 +100,8 @@ export default class BusinessValidateService {
     const MaximunPublicationYearSinceValue = this.rulesListenerService.getRule(
       'MAXIMUM_PUBLISH_YEAR_SINCE',
     );
-    if (!MaximunPublicationYearSinceValue) return false;
+    if (!MaximunPublicationYearSinceValue)
+      throw new HttpException('Bad gatewat', HttpStatus.BAD_GATEWAY);
 
     if (
       new Date().getFullYear() - year <=

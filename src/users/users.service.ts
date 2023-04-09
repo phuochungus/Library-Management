@@ -1,4 +1,11 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import User from 'src/entities/User';
 import { Repository } from 'typeorm';
@@ -83,17 +90,29 @@ export class UsersService {
   }
 
   async remove(id: string) {
+    const user = await this.usersRepository.findOneBy({ userId: id });
+    if (!user) throw new NotFoundException();
+    const books = await user.books;
+    if (!books) throw new ConflictException();
+    user.bookShelf = Promise.resolve([]);
     await this.usersRepository.softDelete({ userId: id });
   }
 
-  async updatePassword(updatePasswordDto: UpdatePasswordDto) {
+  async updatePassword(
+    updatePasswordDto: UpdatePasswordDto,
+    userIdMakeThisAction: string,
+  ) {
     let user = await this.usersRepository.findOne({
       where: { username: updatePasswordDto.username },
-      select: { username: true, password: true },
+      select: { userId: true, password: true },
     });
     if (!user) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
-    if (user.password == updatePasswordDto.oldPassword) {
-      user.password = updatePasswordDto.newPassword;
+    if (user.userId != userIdMakeThisAction) throw new UnauthorizedException();
+    if (bcrypt.compareSync(updatePasswordDto.password, user.password)) {
+      user.password = bcrypt.hashSync(
+        updatePasswordDto.newPassword,
+        this.salt || 15,
+      );
       await this.usersRepository.save(user);
       return;
     }

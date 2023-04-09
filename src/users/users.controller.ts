@@ -9,10 +9,8 @@ import {
   ParseUUIDPipe,
   Put,
   UseGuards,
+  Request,
 } from '@nestjs/common';
-import { BookBorrowRecordsService } from 'src/book-borrow-records/book-borrow-records.service';
-import { BookReturnRecordsService } from 'src/book-return-records/book-return-records.service';
-import { FineReceiptsService } from 'src/fine-receipts/fine-receipts.service';
 import CreateUserDto from './dto/create-user.dto';
 import UpdatePasswordDto from './dto/update-password.dto';
 import UpdateUserDto from './dto/update-user.dto';
@@ -51,8 +49,11 @@ export class UsersController {
   @Put('/password')
   @Roles(Role.Admin, Role.User)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  async updatePassword(@Body() updatePasswordDto: UpdatePasswordDto) {
-    await this.usersService.updatePassword(updatePasswordDto);
+  async updatePassword(
+    @Request() req,
+    @Body() updatePasswordDto: UpdatePasswordDto,
+  ): Promise<void> {
+    await this.usersService.updatePassword(updatePasswordDto, req.user.id);
   }
 
   @Put('/password_reset')

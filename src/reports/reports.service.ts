@@ -64,7 +64,6 @@ export class ReportsService {
     }
 
     await Promise.allSettled(promiseContainer);
-    console.log(result2);
 
     let result3 = {};
     let total = 0;
@@ -78,8 +77,7 @@ export class ReportsService {
         }
       }
     }
-    console.log(result3);
-    console.log(total);
+
     let result4: { genreName: string; count: number; percentage: string }[] =
       [];
     for (let [key, value] of Object.entries(result3)) {
@@ -89,7 +87,6 @@ export class ReportsService {
         percentage: (((value as number) * 100) / total).toPrecision(4),
       });
     }
-    console.log(result4);
     return result4;
   }
 
