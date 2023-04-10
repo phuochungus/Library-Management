@@ -1,4 +1,4 @@
-import { IsEnum, IsNumberString, IsOptional, IsString } from 'class-validator';
+import { IsNumberString, IsOptional, IsString } from 'class-validator';
 
 export default class QueryBookDTO {
   @IsOptional()

@@ -26,37 +26,78 @@ export class BooksService {
     let books: Book[] = await this.booksRepository.find({
       relations: { user: true, genres: true },
     });
-    return books;
+    return books.map((e) => {
+      return {
+        ...e,
+        isAvailable:
+          e.user == null || (e.dueDate && e.dueDate.getTime() < Date.now()),
+      };
+    });
   }
 
   async findAllWithQueryParams(
-    keywords: string = '',
-    name: string = '',
-    author: string = '',
-    genre: string = '',
+    keywords: string | undefined,
+    name: string | undefined,
+    author: string | undefined,
+    genre: string | undefined,
     page: string = '0',
+    status: string | undefined,
   ) {
-    let queryBuilder = await this.booksRepository
+    const RESULT_IN_A_PAGE = 15;
+    let queryBuilder = this.booksRepository
       .createQueryBuilder('book')
       .leftJoinAndSelect('book.genres', 'genre')
-      .where(
-        new Brackets((qb) => {
-          qb.where('book.bookId LIKE :bookId', { bookId: `%${keywords}%` })
-            .orWhere('book.name LIKE :name', { name: `%${keywords}%` })
-            .orWhere('book.author LIKE :author', { author: `%${keywords}%` });
-        }),
-      )
-      .andWhere('book.name LIKE :name', { name: `%${name}%` })
-      .andWhere('book.author LIKE :author', { author: `%${author}%` });
+      .leftJoinAndSelect('book.user', 'user');
 
-    if (page) queryBuilder = queryBuilder.take(15).skip(15 * parseInt(page));
-    let result: Book[];
-    if (genre == '') result = await queryBuilder.getMany();
-    else
-      result = await queryBuilder
-        .andWhere('genre.name LIKE :genre', { genre: `%${genre}%` })
-        .getMany();
-    return result;
+    if (keywords)
+      queryBuilder.where(
+        new Brackets((qb) => {
+          qb.where('book.bookId LIKE :keywords', {
+            keywords: `%${keywords}%`,
+          })
+            .orWhere('book.name LIKE :keywords')
+            .orWhere('book.author LIKE :keywords');
+        }),
+      );
+    if (name)
+      queryBuilder.andWhere('book.name LIKE :name', { name: `%${name}%` });
+    if (author)
+      queryBuilder.andWhere('book.author LIKE :author', {
+        author: `%${author}%`,
+      });
+
+    queryBuilder = queryBuilder
+      .take(RESULT_IN_A_PAGE)
+      .skip(RESULT_IN_A_PAGE * parseInt(page));
+
+    if (genre)
+      queryBuilder.andWhere('genre.name LIKE :genre', { genre: `%${genre}%` });
+
+    switch (status) {
+      case undefined:
+        break;
+
+      case 'AVAILABLE':
+        queryBuilder.andWhere('book.user IS NULL OR book.dueDate < NOW()');
+        break;
+
+      case 'UNAVAILABLE':
+        queryBuilder.andWhere(
+          'book.user IS NOT NULL AND book.dueDate >= NOW()',
+        );
+        break;
+
+      default:
+        break;
+    }
+    let result = await queryBuilder.getMany();
+    return result.map((e: Book) => {
+      return {
+        ...e,
+        isAvailable:
+          e.user == null || (e.dueDate && e.dueDate.getTime() < Date.now()),
+      };
+    });
   }
 
   async findOne(id: string) {

@@ -36,7 +36,8 @@ export class BooksController {
       !queryBookDto.name &&
       !queryBookDto.author &&
       !queryBookDto.genre &&
-      !queryBookDto.page
+      !queryBookDto.page &&
+      !queryBookDto.status
     )
       return await this.booksService.findAll();
     else
@@ -46,6 +47,7 @@ export class BooksController {
         queryBookDto.author,
         queryBookDto.genre,
         queryBookDto.page,
+        queryBookDto.status,
       );
   }
 
