@@ -22,8 +22,8 @@ export class AdminsController {
   constructor(private readonly adminsService: AdminsService) {}
 
   @Post()
-  // @Roles(Role.Admin)
-  // @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async create(@Body() createAdminDto: CreateAdminDto) {
     return await this.adminsService.create(createAdminDto);
   }
