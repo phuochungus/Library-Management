@@ -25,11 +25,17 @@ import { RolesGuard } from 'src/auth/authorization/roles.guard';
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
+  //done
   @Post()
+  async create(@Body() createUserDto: CreateUserDto) {
+    return await this.usersService.create(createUserDto);
+  }
+
+  @Post('/for_admin')
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  async create(@Body() createUserDto: CreateUserDto) {
-    await this.usersService.create(createUserDto);
+  async createByAdmin(@Body() createUserDto: CreateUserDto) {
+    return await this.usersService.createByAdmin(createUserDto, createUserDto.type);
   }
 
   @Get()

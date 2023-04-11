@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import User from 'src/entities/User';
+import User, { UserClass } from 'src/entities/User';
 import { Repository } from 'typeorm';
 import CreateUserDto from './dto/create-user.dto';
 import UpdateUserDto from './dto/update-user.dto';
@@ -48,6 +48,40 @@ export class UsersService {
       ...createUserDto,
       validUntil: new Date(),
       userId: uuidv4(),
+      type: UserClass.X,
+    };
+    userProfile.validUntil.setDate(
+      userProfile.validUntil.getDate() + parseInt(validPeriod),
+    );
+
+    const hashedPassword = bcrypt.hashSync(
+      createUserDto.password,
+      this.salt || 15,
+    );
+    await this.usersRepository.insert({
+      ...userProfile,
+      password: hashedPassword,
+    });
+  }
+
+  async createByAdmin(createUserDto: CreateUserDto, type: UserClass) {
+    let validPeriod = this.rulesService.getRule(
+      'VALID_PERIOD_BY_DAY_OF_USER_ACCOUNT',
+    );
+    if (!validPeriod) throw new Error();
+    if (
+      await this.usersRepository.findOneBy({
+        username: createUserDto.username,
+        isActive: true,
+      })
+    )
+      throw new HttpException('Username is already taken', HttpStatus.CONFLICT);
+
+    const userProfile = {
+      ...createUserDto,
+      validUntil: new Date(),
+      userId: uuidv4(),
+      type,
     };
     userProfile.validUntil.setDate(
       userProfile.validUntil.getDate() + parseInt(validPeriod),

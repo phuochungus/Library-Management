@@ -1,4 +1,11 @@
-import { IsDateString, IsEmail, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { UserClass } from 'src/entities/User';
 
 export default class CreateUserDto {
   @IsString()
@@ -18,4 +25,8 @@ export default class CreateUserDto {
 
   @IsString()
   address: string;
+
+  @IsOptional()
+  @IsEnum(UserClass)
+  type: UserClass;
 }
