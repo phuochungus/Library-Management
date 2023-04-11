@@ -104,7 +104,7 @@ export class BooksController {
 
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Patch(':id/genres')
+  @Patch('/book/:id/genres')
   async updateBookGenres(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateGenresDto: UpdateBookGenresDto,
