@@ -30,17 +30,20 @@ export class BooksController {
   ) {}
 
   //done
+  //temporary remove
+  // @Roles(Role.Admin)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  
   @Post()
-  @Roles(Role.Admin)
-  @UseGuards(JwtAuthGuard, RolesGuard)
   async create(@Body() createBookDto: CreateBookDto) {
     await this.booksService.create(createBookDto);
   }
 
   //done
+  //temporary remove
+  // @Roles(Role.Admin, Role.User)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @Get()
-  @Roles(Role.Admin, Role.User)
-  @UseGuards(JwtAuthGuard, RolesGuard)
   async findAll(@Query() queryBookDto: QueryBookDTO) {
     if (
       !queryBookDto.keywords &&
@@ -62,9 +65,10 @@ export class BooksController {
       );
   }
 
+  //temporary remove
+  // @Roles(Role.Admin)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('book/:id')
-  @Roles(Role.Admin)
-  @UseGuards(JwtAuthGuard, RolesGuard)
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return await this.booksService.findOne(id);
   }
@@ -78,9 +82,10 @@ export class BooksController {
   ) {
     await this.booksService.update(id, updateBookDto);
   }
-
-  @Roles(Role.Admin)
-  @UseGuards(JwtAuthGuard, RolesGuard)
+    
+  // temporary remove
+  // @Roles(Role.Admin)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete('book/:id')
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.booksService.remove(id);
@@ -102,8 +107,9 @@ export class BooksController {
     );
   }
 
-  @Roles(Role.Admin)
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  //temporary remove
+  // @Roles(Role.Admin)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @Patch('/book/:id/genres')
   async updateBookGenres(
     @Param('id', ParseUUIDPipe) id: string,
