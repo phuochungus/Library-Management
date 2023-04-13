@@ -73,9 +73,11 @@ export class BooksController {
     return await this.booksService.findOne(id);
   }
 
+  //Done
+  //temporary remove
+  // @Roles(Role.Admin)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @Patch('book/:id')
-  @Roles(Role.Admin)
-  @UseGuards(JwtAuthGuard, RolesGuard)
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateBookDto: UpdateBookDto,
