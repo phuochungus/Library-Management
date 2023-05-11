@@ -1,7 +1,12 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadGatewayException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import Book from 'src/entities/Book';
-import { Brackets, In, Like, Repository } from 'typeorm';
+import { Brackets, In, InsertResult, Like, Repository } from 'typeorm';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { v4 as uuidv4 } from 'uuid';
@@ -15,11 +20,20 @@ export class BooksService {
   ) {}
 
   async create(createBookDto: CreateBookDto) {
+    const { genreIds, ...rest } = createBookDto;
+    const bookId = uuidv4();
     const bookProfile = {
-      ...createBookDto,
-      bookId: uuidv4(),
+      ...rest,
+      bookId,
     };
     await this.booksRepository.insert(bookProfile);
+    const genres: Genre[] = await this.genresRepository.findBy({
+      genreId: In(genreIds),
+    });
+    let book = await this.booksRepository.findOneBy({ bookId });
+    if (!book) throw new BadGatewayException();
+    book.genres = genres;
+    await this.booksRepository.save(book);
   }
 
   async findAll(): Promise<Book[]> {

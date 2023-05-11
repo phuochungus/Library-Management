@@ -8,7 +8,6 @@ import {
   Delete,
   ParseUUIDPipe,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
@@ -18,10 +17,6 @@ import _ from 'lodash';
 import { ReserveBookDto } from './dto/reserve-book.dto';
 import { ReserveService } from './reserve/reserve.service';
 import QueryBookDTO from './dto/query-book.dto';
-import { JwtAuthGuard } from 'src/auth/authentication/jwt-auth.guard';
-import { Role } from 'src/auth/authorization/role.enum';
-import { Roles } from 'src/auth/authorization/roles.decorator';
-import { RolesGuard } from 'src/auth/authorization/roles.guard';
 @Controller('books')
 export class BooksController {
   constructor(
@@ -33,7 +28,7 @@ export class BooksController {
   //temporary remove
   // @Roles(Role.Admin)
   // @UseGuards(JwtAuthGuard, RolesGuard)
-  
+
   @Post()
   async create(@Body() createBookDto: CreateBookDto) {
     await this.booksService.create(createBookDto);
@@ -84,7 +79,7 @@ export class BooksController {
   ) {
     await this.booksService.update(id, updateBookDto);
   }
-    
+
   // temporary remove
   // @Roles(Role.Admin)
   // @UseGuards(JwtAuthGuard, RolesGuard)
