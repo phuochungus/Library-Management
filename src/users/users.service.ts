@@ -156,6 +156,7 @@ export class UsersService {
   async resetPassword(resetPasswordDto: ResetPasswordDTO) {
     let user = await this.usersRepository.findOneBy({
       email: resetPasswordDto.email,
+      username: resetPasswordDto.username,
     });
 
     if (user) {

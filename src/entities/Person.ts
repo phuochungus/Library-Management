@@ -4,13 +4,13 @@ export abstract class Person {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ unique: true })
   username: string;
 
   @Column({ select: false })
   password: string;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Column()
