@@ -1,4 +1,5 @@
 import {
+  BadGatewayException,
   ConflictException,
   HttpException,
   HttpStatus,
@@ -58,10 +59,16 @@ export class UsersService {
       createUserDto.password,
       this.salt || 15,
     );
-    await this.usersRepository.insert({
-      ...userProfile,
-      password: hashedPassword,
-    });
+    try {
+      await this.usersRepository.insert({
+        ...userProfile,
+        password: hashedPassword,
+      });
+    } catch (error) {
+      if (error.code == 'ER_DUP_ENTRY')
+        throw new ConflictException('Email or username already taken');
+      throw new BadGatewayException();
+    }
   }
 
   async createByAdmin(createUserDto: CreateUserDto, type: UserClass) {
