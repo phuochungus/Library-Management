@@ -9,7 +9,7 @@ export class MailService {
     this.mailerService.sendMail({
       to: email,
       from: '21520252@gm.uit.edu.vn',
-      subject: 'test',
+      subject: 'Your new password',
       text: 'text here',
       html: `<h1>Your new password:${newPassword}</h1>`,
     });
