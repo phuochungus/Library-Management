@@ -40,6 +40,9 @@ export class BooksService {
     let books: Book[] = await this.booksRepository.find({
       relations: { user: true, genres: true },
     });
+    books.sort((b1, b2) => {
+      return b2.createdDate.getTime() - b1.createdDate.getTime();
+    });
     return books.map((e) => {
       return {
         ...e,
@@ -126,8 +129,14 @@ export class BooksService {
   async update(id: string, updateBookDto: UpdateBookDto): Promise<Book | null> {
     let book = await this.findOne(id);
     if (!book) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-
-    book = { ...book, ...updateBookDto };
+    if (updateBookDto.genreIds) {
+      const genres: Genre[] = await this.genresRepository.findBy({
+        genreId: In(updateBookDto.genreIds),
+      });
+      book.genres = genres;
+    }
+    const { genreIds, ...rest } = updateBookDto;
+    book = { ...book, ...rest };
     return await this.booksRepository.save(book);
   }
 

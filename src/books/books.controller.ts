@@ -12,7 +12,6 @@ import {
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
-import UpdateBookGenresDto from './dto/update-genres.dto';
 import _ from 'lodash';
 import { ReserveBookDto } from './dto/reserve-book.dto';
 import { ReserveService } from './reserve/reserve.service';
@@ -107,11 +106,4 @@ export class BooksController {
   //temporary remove
   // @Roles(Role.Admin)
   // @UseGuards(JwtAuthGuard, RolesGuard)
-  @Patch('/book/:id/genres')
-  async updateBookGenres(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateGenresDto: UpdateBookGenresDto,
-  ) {
-    await this.booksService.updateBookGenre(id, updateGenresDto.genreNames);
-  }
 }
