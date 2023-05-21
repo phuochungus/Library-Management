@@ -52,7 +52,7 @@ export class BookBorrowRecordsService {
       (await this.businessValidateService.IsUserAbleToMakeBorrowRequest(user))
     ) {
       for (let index in books) {
-        if (!this.businessValidateService.isBookAvailable(books[index], userId))
+        if (!this.businessValidateService.isBookAvailableForUser(books[index], userId))
           throw new HttpException(
             { bookId: books[index].bookId, message: 'book not available' },
             HttpStatus.CONFLICT,

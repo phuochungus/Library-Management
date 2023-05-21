@@ -62,16 +62,25 @@ export default class BusinessValidateService {
     return validUntil.getTime() > Date.now();
   }
 
-  isBookAvailable(book: Book, userId: string): boolean {
+  isBookAvailable(book: Book) {
     if (!book) return false;
+    if (
+      this.isBookNotBorrowedAndNotReserved(book) &&
+      this.isBookPublicationYearValid(book.publishYear)
+    )
+      return true;
+    return false;
+  }
 
+  isBookAvailableForUser(book: Book, userId: string): boolean {
+    if (!book) return false;
     if (
       (this.isBookNotBorrowedAndNotReserved(book) ||
         this.isBookReserveForThisUser(userId, book)) &&
       this.isBookPublicationYearValid(book.publishYear)
     )
       return true;
-    else return false;
+    return false;
   }
 
   static isBookReserved(book: Book): boolean {

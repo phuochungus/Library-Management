@@ -6,17 +6,19 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import Book from 'src/entities/Book';
-import { Brackets, In, InsertResult, Like, Repository } from 'typeorm';
+import { Brackets, In, Repository } from 'typeorm';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { v4 as uuidv4 } from 'uuid';
 import Genre from 'src/entities/Genre';
+import BusinessValidateService from 'src/business-validate/business-validate.service';
 
 @Injectable()
 export class BooksService {
   constructor(
     @InjectRepository(Book) private booksRepository: Repository<Book>,
     @InjectRepository(Genre) private genresRepository: Repository<Genre>,
+    private readonly businessValidateService: BusinessValidateService,
   ) {}
 
   async create(createBookDto: CreateBookDto) {
@@ -111,8 +113,7 @@ export class BooksService {
     return result.map((e: Book) => {
       return {
         ...e,
-        isAvailable:
-          e.user == null || (e.dueDate && e.dueDate.getTime() < Date.now()),
+        isAvailable: this.businessValidateService.isBookAvailable(e),
       };
     });
   }
