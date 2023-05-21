@@ -111,7 +111,7 @@ export default class BusinessValidateService {
     );
     if (!MaximunPublicationYearSinceValue)
       throw new HttpException('Bad gatewat', HttpStatus.BAD_GATEWAY);
-
+    console.log(year);
     if (
       new Date().getFullYear() - year <=
       parseInt(MaximunPublicationYearSinceValue)
