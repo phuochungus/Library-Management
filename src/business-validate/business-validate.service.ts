@@ -7,7 +7,7 @@ import { RulesService } from 'src/rules/rules.service';
 export default class BusinessValidateService {
   constructor(private rulesListenerService: RulesService) {}
 
-  async IsUserAbleToMakeBorrowRequest(user: User): Promise<boolean> {
+  async isUserAbleToMakeBorrowRequest(user: User): Promise<boolean> {
     if (!user) return false;
     const userBooks = await user.books;
 
@@ -111,7 +111,6 @@ export default class BusinessValidateService {
     );
     if (!MaximunPublicationYearSinceValue)
       throw new HttpException('Bad gatewat', HttpStatus.BAD_GATEWAY);
-    console.log(year);
     if (
       new Date().getFullYear() - year <=
       parseInt(MaximunPublicationYearSinceValue)

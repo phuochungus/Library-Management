@@ -20,6 +20,7 @@ import { ConfigService } from '@nestjs/config';
 import ResetPasswordDTO from './dto/reset-password.dto';
 import { MailService } from 'src/mail/mail.service';
 import { randomBytes } from 'crypto';
+import BusinessValidateService from 'src/business-validate/business-validate.service';
 
 @Injectable()
 export class UsersService {
@@ -28,6 +29,7 @@ export class UsersService {
     private rulesService: RulesService,
     private configService: ConfigService,
     private mailService: MailService,
+    private businessValidateService: BusinessValidateService,
   ) {}
 
   private salt = this.configService.get<string>('SALT');
@@ -51,6 +53,10 @@ export class UsersService {
       userId: uuidv4(),
       type: UserClass.X,
     };
+
+    if (!this.businessValidateService.isUserAgeValid(userProfile.birth))
+      throw new ConflictException('User age not available');
+
     userProfile.validUntil.setDate(
       userProfile.validUntil.getDate() + parseInt(validPeriod),
     );

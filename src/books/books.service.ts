@@ -1,5 +1,6 @@
 import {
   BadGatewayException,
+  ConflictException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -28,6 +29,13 @@ export class BooksService {
       ...rest,
       bookId,
     };
+    if (
+      !this.businessValidateService.isBookPublicationYearValid(
+        createBookDto.publishYear,
+      )
+    )
+      throw new ConflictException('Book publish year not available');
+      
     await this.booksRepository.insert(bookProfile);
     const genres: Genre[] = await this.genresRepository.findBy({
       genreId: In(genreIds),
@@ -48,8 +56,7 @@ export class BooksService {
     return books.map((e) => {
       return {
         ...e,
-        isAvailable:
-          e.user == null || (e.dueDate && e.dueDate.getTime() < Date.now()),
+        isAvailable: this.businessValidateService.isBookAvailable(e),
       };
     });
   }

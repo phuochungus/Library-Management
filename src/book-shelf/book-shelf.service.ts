@@ -30,7 +30,7 @@ export class BookShelfService {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 
     if (
-      await this.businessValidateService.IsUserAbleToMakeBorrowRequest(user)
+      await this.businessValidateService.isUserAbleToMakeBorrowRequest(user)
     ) {
       let userBookShelf = await user.bookShelf;
       user.bookShelf = Promise.resolve([...userBookShelf, book]);

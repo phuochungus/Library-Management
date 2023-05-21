@@ -8,6 +8,7 @@ import { BookReturnRecordsModule } from 'src/book-return-records/book-return-rec
 import { FineReceiptsModule } from 'src/fine-receipts/fine-receipts.module';
 import { RulesModule } from 'src/rules/rules.module';
 import { MailModule } from 'src/mail/mail.module';
+import { BusinessValidateModule } from 'src/business-validate/business-validate.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { MailModule } from 'src/mail/mail.module';
     BookBorrowRecordsModule,
     BookReturnRecordsModule,
     FineReceiptsModule,
+    BusinessValidateModule,
     RulesModule,
   ],
   controllers: [UsersController],

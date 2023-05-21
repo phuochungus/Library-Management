@@ -49,7 +49,7 @@ export class BookBorrowRecordsService {
     if (
       user &&
       books.length != 0 &&
-      (await this.businessValidateService.IsUserAbleToMakeBorrowRequest(user))
+      (await this.businessValidateService.isUserAbleToMakeBorrowRequest(user))
     ) {
       for (let index in books) {
         if (!this.businessValidateService.isBookAvailableForUser(books[index], userId))

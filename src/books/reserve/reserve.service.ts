@@ -23,7 +23,7 @@ export class ReserveService {
     });
     if (user && book) {
       if (
-        (await this.busnessValidateService.IsUserAbleToMakeBorrowRequest(
+        (await this.busnessValidateService.isUserAbleToMakeBorrowRequest(
           user,
         )) &&
         (this.busnessValidateService.isBookNotBorrowedAndNotReserved(book) ||
