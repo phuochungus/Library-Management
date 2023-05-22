@@ -77,6 +77,12 @@ export class UsersController {
     await this.usersService.update(req.user.id, updateUserDto);
   }
 
+  @Get('/me')
+  @UseGuards(JwtAuthGuard)
+  async getInfoSelf(@Req() req) {
+    return await this.usersService.findOne(req.user.id);
+  }
+
   @Patch('user/:id')
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
