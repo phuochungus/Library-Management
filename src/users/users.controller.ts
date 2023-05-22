@@ -10,6 +10,7 @@ import {
   Put,
   UseGuards,
   Request,
+  Req,
 } from '@nestjs/common';
 import CreateUserDto from './dto/create-user.dto';
 import UpdatePasswordDto from './dto/update-password.dto';
@@ -35,7 +36,10 @@ export class UsersController {
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async createByAdmin(@Body() createUserDto: CreateUserDto) {
-    return await this.usersService.createByAdmin(createUserDto, createUserDto.type);
+    return await this.usersService.createByAdmin(
+      createUserDto,
+      createUserDto.type,
+    );
   }
 
   @Get()
@@ -65,6 +69,12 @@ export class UsersController {
   @Put('/password_reset')
   async resetPasswrod(@Body() resetPasswordDto: ResetPasswordDTO) {
     await this.usersService.resetPassword(resetPasswordDto);
+  }
+
+  @Patch('/me')
+  @UseGuards(JwtAuthGuard)
+  async updateUserSelf(@Req() req, @Body() updateUserDto: UpdateUserDto) {
+    await this.usersService.update(req.user.id, updateUserDto);
   }
 
   @Patch('user/:id')

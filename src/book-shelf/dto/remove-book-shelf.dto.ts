@@ -1,9 +1,7 @@
-import { IsUUID } from 'class-validator';
+import { IsNotEmpty, IsUUID } from 'class-validator';
 
 export class RemoveBookShelfDto {
-  @IsUUID()
-  userId: string;
-
+  @IsNotEmpty()
   @IsUUID()
   bookId: string;
 }

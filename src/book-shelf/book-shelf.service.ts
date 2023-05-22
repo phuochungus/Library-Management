@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import Book from 'src/entities/Book';
 import User from 'src/entities/User';
@@ -18,17 +23,16 @@ export class BookShelfService {
     private rulesService: RulesService,
   ) {}
 
-  async addBookToUserShelf(createBookShelfDto: CreateBookShelfDto) {
+  async addBookToUserShelf(userId: string, bookId: string) {
     let user = await this.usersRepository.findOneBy({
-      userId: createBookShelfDto.userId,
+      userId: userId,
     });
     let book = await this.booksRepository.findOneBy({
-      bookId: createBookShelfDto.bookId,
+      bookId: bookId,
     });
 
-    if (!user || !book)
-      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
-
+    if (!book) throw new NotFoundException('Book not found');
+    if (!user) throw new NotFoundException('User not found');
     if (
       await this.businessValidateService.isUserAbleToMakeBorrowRequest(user)
     ) {
@@ -48,16 +52,16 @@ export class BookShelfService {
     return await user.bookShelf;
   }
 
-  async remove(removeBookShelfDto: RemoveBookShelfDto) {
+  async remove(userId: string, bookId: string) {
     let user = await this.usersRepository.findOneBy({
-      userId: removeBookShelfDto.userId,
+      userId: userId,
     });
     let book = await this.booksRepository.findOneBy({
-      bookId: removeBookShelfDto.bookId,
+      bookId: bookId,
     });
 
-    if (!user || !book)
-      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+    if (!book) throw new NotFoundException('Book not found');
+    if (!user) throw new NotFoundException('User not found');
 
     let userBookShelf = await user.bookShelf;
     for (const i in userBookShelf) {
