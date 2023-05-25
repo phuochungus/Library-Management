@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import Book from 'src/entities/Book';
 import User from 'src/entities/User';
 import { RulesService } from 'src/rules/rules.service';
@@ -11,14 +16,25 @@ export default class BusinessValidateService {
     if (!user) return false;
     const userBooks = await user.books;
 
-    if (
-      this.isUserAgeValid(user.birth) &&
-      !this.isUserReachBorrowLimit(userBooks) &&
-      this.isUserAccountValid(user.validUntil) &&
-      this.isUserNotPassDueAnyBook(userBooks)
-    )
-      return true;
-    else return false;
+    if (!this.isUserAgeValid(user.birth))
+      throw new ConflictException('User age not supported');
+
+    if (this.isUserReachBorrowLimit(userBooks))
+      throw new ConflictException('User reach borrow limit');
+
+    if (!this.isUserAccountValid(user.validUntil))
+      throw new ConflictException('User account is expired');
+
+    if (!this.isUserNotPassDueAnyBook(userBooks))
+      throw new ConflictException('User has pass due book');
+    // if (
+    //   this.isUserAgeValid(user.birth) &&
+    //   !this.isUserReachBorrowLimit(userBooks) &&
+    //   this.isUserAccountValid(user.validUntil) &&
+    //   this.isUserNotPassDueAnyBook(userBooks)
+    // )
+    return true;
+    // else return false;
   }
 
   isUserNotPassDueAnyBook(books: Book[]): boolean {
