@@ -107,7 +107,7 @@ export class BooksController {
   @UseGuards(JwtAuthGuard)
   async cancelReserve(@Body() reserveBookDto: ReserveBookDto) {
     await this.reserveService.cancelReserve(
-      reserveBookDto.bookId,
+      reserveBookDto.userId,
       reserveBookDto.bookId,
     );
   }
