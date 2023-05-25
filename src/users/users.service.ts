@@ -21,11 +21,14 @@ import ResetPasswordDTO from './dto/reset-password.dto';
 import { MailService } from 'src/mail/mail.service';
 import { randomBytes } from 'crypto';
 import BusinessValidateService from 'src/business-validate/business-validate.service';
+import Book from 'src/entities/Book';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
+    @InjectRepository(Book) private booksRepository: Repository<Book>,
+
     private rulesService: RulesService,
     private configService: ConfigService,
     private mailService: MailService,
@@ -179,5 +182,17 @@ export class UsersService {
       await this.usersRepository.save(user);
       this.mailService.sendNewPassword(resetPasswordDto.email, randomPassword);
     }
+  }
+
+  async findAllReservedBook(id: string) {
+    const user = await this.usersRepository.findOne({
+      where: { userId: id },
+    });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    const books = await user.books;
+
+    return books.filter((e) => e.borrowedDate == null);
   }
 }

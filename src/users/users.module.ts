@@ -9,11 +9,12 @@ import { FineReceiptsModule } from 'src/fine-receipts/fine-receipts.module';
 import { RulesModule } from 'src/rules/rules.module';
 import { MailModule } from 'src/mail/mail.module';
 import { BusinessValidateModule } from 'src/business-validate/business-validate.module';
+import Book from 'src/entities/Book';
 
 @Module({
   imports: [
     MailModule,
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Book]),
     BookBorrowRecordsModule,
     BookReturnRecordsModule,
     FineReceiptsModule,

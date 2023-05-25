@@ -56,6 +56,12 @@ export class UsersController {
     return await this.usersService.findOne(id);
   }
 
+  @Get('user/:id/reserved_book')
+  async getAllReservedBookFromUser(@Param('id', ParseUUIDPipe) id: string) {
+    console.log(1);
+    return await this.usersService.findAllReservedBook(id);
+  }
+
   @Put('/password')
   @Roles(Role.Admin, Role.User)
   @UseGuards(JwtAuthGuard, RolesGuard)
