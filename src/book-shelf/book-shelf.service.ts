@@ -20,7 +20,6 @@ export class BookShelfService {
     @InjectRepository(User) private usersRepository: Repository<User>,
     @InjectRepository(Book) private booksRepository: Repository<Book>,
     private businessValidateService: BusinessValidateService,
-    private rulesService: RulesService,
   ) {}
 
   async addBookToUserShelf(userId: string, bookId: string) {
@@ -33,17 +32,17 @@ export class BookShelfService {
 
     if (!book) throw new NotFoundException('Book not found');
     if (!user) throw new NotFoundException('User not found');
-    if (
-      await this.businessValidateService.isUserAbleToMakeBorrowRequest(user)
-    ) {
-      let userBookShelf = await user.bookShelf;
-      user.bookShelf = Promise.resolve([...userBookShelf, book]);
-      await this.usersRepository.save(user);
-    } else
-      throw new HttpException(
-        'User not able to perform action',
-        HttpStatus.CONFLICT,
-      );
+    // if (
+    //   await this.businessValidateService.isUserAbleToMakeBorrowRequest(user)
+    // ) {
+    let userBookShelf = await user.bookShelf;
+    user.bookShelf = Promise.resolve([...userBookShelf, book]);
+    await this.usersRepository.save(user);
+    // } else
+    //   throw new HttpException(
+    //     'User not able to perform action',
+    //     HttpStatus.CONFLICT,
+    //   );
   }
 
   async findAllFromUser(userId: string) {
