@@ -52,6 +52,7 @@ export class UsersService {
 
     const userProfile = {
       ...createUserDto,
+      birth: new Date(createUserDto.birth),
       validUntil: new Date(),
       userId: uuidv4(),
       type: UserClass.X,
