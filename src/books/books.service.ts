@@ -35,7 +35,7 @@ export class BooksService {
       )
     )
       throw new ConflictException('Book publish year not available');
-      
+
     await this.booksRepository.insert(bookProfile);
     const genres: Genre[] = await this.genresRepository.findBy({
       genreId: In(genreIds),
@@ -130,7 +130,11 @@ export class BooksService {
       where: { bookId: id },
       relations: { user: true, genres: true },
     });
-    if (book) return book;
+    if (book)
+      return {
+        ...book,
+        isAvaileble: this.businessValidateService.isBookAvailable(book),
+      };
     throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
   }
 
