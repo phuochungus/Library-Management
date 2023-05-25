@@ -35,6 +35,7 @@ export default class Book implements TimeStampImp {
   @ManyToOne(() => User, (user) => user.books, {
     nullable: true,
     cascade: true,
+    eager: true,
   })
   user: User | null;
 
