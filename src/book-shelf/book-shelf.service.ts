@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import Book from 'src/entities/Book';
 import User from 'src/entities/User';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateBookShelfDto } from './dto/create-book-shelf.dto';
 import _ from 'lodash';
 import BusinessValidateService from 'src/business-validate/business-validate.service';
@@ -23,21 +23,22 @@ export class BookShelfService {
     private rulesService: RulesService,
   ) {}
 
-  async addBookToUserShelf(userId: string, bookId: string) {
+  async addBookToUserShelf(userId: string, bookIds: string[]) {
     let user = await this.usersRepository.findOneBy({
       userId: userId,
     });
-    let book = await this.booksRepository.findOneBy({
-      bookId: bookId,
+    let books = await this.booksRepository.findBy({
+      bookId: In(bookIds),
     });
 
-    if (!book) throw new NotFoundException('Book not found');
+    if (books.length != bookIds.length)
+      throw new NotFoundException('Some book not found');
     if (!user) throw new NotFoundException('User not found');
     if (
       await this.businessValidateService.isUserAbleToMakeBorrowRequest(user)
     ) {
       let userBookShelf = await user.bookShelf;
-      user.bookShelf = Promise.resolve([...userBookShelf, book]);
+      user.bookShelf = Promise.resolve([...userBookShelf, ...books]);
       await this.usersRepository.save(user);
     } else
       throw new HttpException(
@@ -52,25 +53,24 @@ export class BookShelfService {
     return await user.bookShelf;
   }
 
-  async remove(userId: string, bookId: string) {
+  async remove(userId: string, bookIds: string[]) {
     let user = await this.usersRepository.findOneBy({
       userId: userId,
     });
-    let book = await this.booksRepository.findOneBy({
-      bookId: bookId,
+    let book = await this.booksRepository.findBy({
+      bookId: In(bookIds),
     });
 
-    if (!book) throw new NotFoundException('Book not found');
+    if (book.length != bookIds.length)
+      throw new NotFoundException('Sone book not found');
     if (!user) throw new NotFoundException('User not found');
 
     let userBookShelf = await user.bookShelf;
-    for (const i in userBookShelf) {
-      if (userBookShelf[i].bookId == book.bookId) {
-        userBookShelf.splice(parseInt(i), 1);
-        user.bookShelf = Promise.resolve(userBookShelf);
-        await this.usersRepository.save(user);
-        break;
-      }
-    }
+    console.log(userBookShelf);
+
+    userBookShelf = userBookShelf.filter((e) => !bookIds.includes(e.bookId));
+
+    user.bookShelf = Promise.resolve(userBookShelf);
+    await this.usersRepository.save(user);
   }
 }

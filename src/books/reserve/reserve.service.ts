@@ -1,10 +1,15 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import BusinessValidateService from 'src/business-validate/business-validate.service';
 import Book from 'src/entities/Book';
 import User from 'src/entities/User';
 import { RulesService } from 'src/rules/rules.service';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 @Injectable()
 export class ReserveService {
@@ -50,18 +55,26 @@ export class ReserveService {
     } else throw new HttpException('Not found', HttpStatus.NOT_FOUND);
   }
 
-  async cancelReserve(userId: string, bookId: string) {
-    let book = await this.booksRepository.findOne({
-      where: { bookId },
+  async cancelReserve(userId: string, bookIds: string[]) {
+    let books: Book[] = await this.booksRepository.find({
+      where: { bookId: In(bookIds) },
       relations: { user: true },
     });
 
-    if (!book) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
-    if (this.busnessValidateService.isBookReserveForThisUser(userId, book)) {
-      book.user = null;
-      book.dueDate = null;
-      book.reservedDate = null;
-      await this.booksRepository.save(book);
+    if (books.length != bookIds.length)
+      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+    for (let book of books) {
+      if (!this.busnessValidateService.isBookReserveForThisUser(userId, book))
+        throw new ConflictException('Book not reserve for this user');
     }
+    let promises: Promise<any>[] = [];
+    for (let index in books) {
+      books[index].user = null;
+      books[index].dueDate = null;
+      books[index].reservedDate = null;
+      promises.push(this.booksRepository.save(books[index]));
+    }
+
+    await Promise.all(promises);
   }
 }

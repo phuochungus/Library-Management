@@ -8,6 +8,8 @@ import {
   Delete,
   ParseUUIDPipe,
   Query,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
@@ -16,6 +18,9 @@ import _ from 'lodash';
 import { ReserveBookDto } from './dto/reserve-book.dto';
 import { ReserveService } from './reserve/reserve.service';
 import QueryBookDTO from './dto/query-book.dto';
+import { CancelReserveDTO } from './dto/cancel-reserve-book.dto';
+import { JwtAuthGuard } from 'src/auth/authentication/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/authorization/roles.guard';
 @Controller('books')
 export class BooksController {
   constructor(
@@ -96,10 +101,11 @@ export class BooksController {
   }
 
   @Delete('/reserve')
-  async cancelReserve(@Body() reserveBookDto: ReserveBookDto) {
+  @UseGuards(JwtAuthGuard)
+  async cancelReserve(@Req() req, @Body() reserveBookDto: CancelReserveDTO) {
     await this.reserveService.cancelReserve(
-      reserveBookDto.userId,
-      reserveBookDto.bookId,
+      req.user.id,
+      reserveBookDto.bookIds,
     );
   }
 
