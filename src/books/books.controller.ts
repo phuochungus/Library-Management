@@ -18,7 +18,6 @@ import _ from 'lodash';
 import { ReserveBookDto } from './dto/reserve-book.dto';
 import { ReserveService } from './reserve/reserve.service';
 import QueryBookDTO from './dto/query-book.dto';
-import { CancelReserveDTO } from './dto/cancel-reserve-book.dto';
 import { JwtAuthGuard } from 'src/auth/authentication/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/authorization/roles.guard';
 @Controller('books')
@@ -98,6 +97,12 @@ export class BooksController {
       reserveBookDto.userId,
       reserveBookDto.bookId,
     );
+  }
+
+  @Get('/reserve')
+  @UseGuards(JwtAuthGuard)
+  async getReserve() {
+    return await this.reserveService;
   }
 
   @Delete('/reserve')

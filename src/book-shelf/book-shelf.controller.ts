@@ -28,7 +28,7 @@ export class BookShelfController {
     console.log(req.user);
     await this.bookShelfService.addBookToUserShelf(
       req.user.id,
-      createBookShelfDto.bookIds,
+      createBookShelfDto.bookId,
     );
   }
 
@@ -43,9 +43,6 @@ export class BookShelfController {
   @Roles(Role.User)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async remove(@Req() req, @Body() removeBookShelfDtop: RemoveBookShelfDto) {
-    await this.bookShelfService.remove(
-      req.user.id,
-      removeBookShelfDtop.bookIds,
-    );
+    await this.bookShelfService.remove(req.user.id, removeBookShelfDtop.bookId);
   }
 }
