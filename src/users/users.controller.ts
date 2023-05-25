@@ -58,7 +58,6 @@ export class UsersController {
 
   @Get('user/:id/reserved_book')
   async getAllReservedBookFromUser(@Param('id', ParseUUIDPipe) id: string) {
-    console.log(1);
     return await this.usersService.findAllReservedBook(id);
   }
 

@@ -25,7 +25,6 @@ export class BookShelfController {
   @Roles(Role.User)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async create(@Req() req, @Body() createBookShelfDto: CreateBookShelfDto) {
-    console.log(req.user);
     await this.bookShelfService.addBookToUserShelf(
       req.user.id,
       createBookShelfDto.bookId,

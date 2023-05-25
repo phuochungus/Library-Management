@@ -191,8 +191,18 @@ export class UsersService {
 
     if (!user) throw new NotFoundException('User not found');
 
-    const books = await user.books;
+    let books = await user.books;
 
-    return books.filter((e) => e.borrowedDate == null);
+    books = books.filter((e) => e.borrowedDate == null);
+
+    let newBookObj = books.map((e) => {
+      return {
+        ...e,
+        remainReserveTime:
+          (e.dueDate!.getTime() - Date.now()) / (60 * 60 * 1000),
+      };
+    });
+
+    return newBookObj.filter((e) => e.remainReserveTime > 0);
   }
 }
