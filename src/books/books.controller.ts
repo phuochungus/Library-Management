@@ -107,11 +107,8 @@ export class BooksController {
 
   @Delete('/reserve')
   @UseGuards(JwtAuthGuard)
-  async cancelReserve(@Req() req, @Body() reserveBookDto: CancelReserveDTO) {
-    await this.reserveService.cancelReserve(
-      req.user.id,
-      reserveBookDto.bookIds,
-    );
+  async cancelReserve(@Req() req, @Body() reserveBookDto: ReserveBookDto) {
+    await this.reserveService.cancelReserve(req.user.id, reserveBookDto.bookId);
   }
 
   //temporary remove
