@@ -61,10 +61,9 @@ export class UsersController {
     return await this.usersService.findAllReservedBook(id);
   }
 
-  @Get('/me/borrow_book')
-  @UseGuards(JwtAuthGuard)
-  async getBorrowBook(@Req() req) {
-    return await this.usersService.getAllBorrowing(req.user.id);
+  @Get('/borrow_book/:userId')
+  async getBorrowBook(@Param('userId', ParseUUIDPipe) userId: string) {
+    return await this.usersService.getAllBorrowing(userId);
   }
 
   @Put('/password')
