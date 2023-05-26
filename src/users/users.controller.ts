@@ -61,6 +61,12 @@ export class UsersController {
     return await this.usersService.findAllReservedBook(id);
   }
 
+  @Get('/me/borrow_book')
+  @UseGuards(JwtAuthGuard)
+  async getBorrowBook(@Req() req) {
+    return await this.usersService.getAllBorrowing(req.user.id);
+  }
+
   @Put('/password')
   @Roles(Role.Admin, Role.User)
   @UseGuards(JwtAuthGuard, RolesGuard)

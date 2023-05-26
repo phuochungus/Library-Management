@@ -206,4 +206,11 @@ export class UsersService {
 
     return newBookObj.filter((e) => e.remainReserveTime > 0);
   }
+
+  async getAllBorrowing(id: any) {
+    const user = await this.usersRepository.findOneBy({ userId: id });
+    if (!user) throw new NotFoundException('User not found');
+    const books = await user.books;
+    return books.filter((b) => b.borrowedDate != null);
+  }
 }
