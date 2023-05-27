@@ -20,4 +20,11 @@ export class BookBorrowReturnHistoriesController {
   findAllFromUser(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.bookBorrowReturnHistoriesService.findAllFromUser(userId);
   }
+
+  @Get('/return_session/:id')
+  async findAllFromSession(@Param('id') sessionId) {
+    return await this.bookBorrowReturnHistoriesService.getReturnSession(
+      sessionId,
+    );
+  }
 }
