@@ -58,11 +58,10 @@ export class RulesController {
   }
 
   @Roles(Role.Admin)
-  @Get('/max_publish_year')
+  @Get('/max_borrow')
   getBorrowMax() {
     return this.rulesService.getRule('BORROW_MAX');
   }
-
   @Roles(Role.Admin)
   @Patch('/fine_per_day')
   async updateFinePerDay(@Body() updateRuleDto: UpdateRuleDto) {
