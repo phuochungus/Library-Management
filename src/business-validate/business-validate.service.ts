@@ -27,14 +27,7 @@ export default class BusinessValidateService {
 
     if (!this.isUserNotPassDueAnyBook(userBooks))
       throw new ConflictException('User has pass due book');
-    // if (
-    //   this.isUserAgeValid(user.birth) &&
-    //   !this.isUserReachBorrowLimit(userBooks) &&
-    //   this.isUserAccountValid(user.validUntil) &&
-    //   this.isUserNotPassDueAnyBook(userBooks)
-    // )
     return true;
-    // else return false;
   }
 
   isUserNotPassDueAnyBook(books: Book[]): boolean {
@@ -55,14 +48,17 @@ export default class BusinessValidateService {
     throw new HttpException('Bad gatewat', HttpStatus.BAD_GATEWAY);
   }
 
-  isUserReachBorrowLimit(books: Book[]): boolean {
+  isUserReachBorrowLimit(
+    books: Book[],
+    numberOfBookAboutTobeBorrow = 0,
+  ): boolean {
     const borrowMaxValue = this.rulesListenerService.getRule('BORROW_MAX');
     const borrowDueValue = this.rulesListenerService.getRule('DUE_BY_DAYS');
     if (borrowMaxValue && borrowDueValue) {
       const borrowMax = parseInt(borrowMaxValue);
       const borrowDueByDays = parseInt(borrowDueValue);
       const DAY_IN_MILISECOND = 24 * 60 * 60 * 1000;
-      let count = 0;
+      let count = numberOfBookAboutTobeBorrow;
       const dateInPast = new Date(
         Date.now() - borrowDueByDays * DAY_IN_MILISECOND,
       );
@@ -91,12 +87,18 @@ export default class BusinessValidateService {
   isBookAvailableForUser(book: Book, userId: string): boolean {
     if (!book) return false;
     if (
-      (this.isBookNotBorrowedAndNotReserved(book) ||
-        this.isBookReserveForThisUser(userId, book)) &&
-      this.isBookPublicationYearValid(book.publishYear)
+      !(
+        this.isBookNotBorrowedAndNotReserved(book) ||
+        this.isBookReserveForThisUser(userId, book)
+      )
     )
-      return true;
-    return false;
+      throw new ConflictException('Book not available for user');
+      
+    if (!this.isBookPublicationYearValid(book.publishYear))
+      throw new ConflictException(
+        'Book publication year too old, can not borrow such old book for presevation policy',
+      );
+    return true;
   }
 
   static isBookReserved(book: Book): boolean {
