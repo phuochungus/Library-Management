@@ -99,7 +99,14 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    let user = await this.usersRepository.findOneBy({ userId: id });
+    let user = await this.usersRepository.findOneBy({ userId: id });4
+    if (!user) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    if (
+      updateUserDto.birth &&
+      !this.businessValidateService.isUserAgeValid(updateUserDto.birth)
+    )
+      throw new ConflictException('User age not available');
+
     if (user) {
       user = { ...user, ...updateUserDto };
       try {
@@ -110,12 +117,6 @@ export class UsersService {
         throw error;
       }
     }
-    if (!user) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-    if (
-      updateUserDto.birth &&
-      !this.businessValidateService.isUserAgeValid(updateUserDto.birth)
-    )
-      throw new ConflictException('User age not available');
   }
 
   async remove(id: string) {

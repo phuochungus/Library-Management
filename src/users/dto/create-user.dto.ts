@@ -1,4 +1,6 @@
+import { Transform } from 'class-transformer';
 import {
+  IsDate,
   IsDateString,
   IsEmail,
   IsEnum,
@@ -20,7 +22,8 @@ export default class CreateUserDto {
   @IsString()
   name: string;
 
-  @IsDateString()
+  @IsDate()
+  @Transform(({ value }) => new Date(value))
   birth: Date;
 
   @IsString()
