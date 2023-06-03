@@ -37,7 +37,7 @@ export class UsersService {
 
   private salt = this.configService.get<string>('SALT');
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto, isAdminCreate: boolean = false) {
     let validPeriod = this.rulesService.getRule(
       'VALID_PERIOD_BY_DAY_OF_USER_ACCOUNT',
     );
@@ -55,7 +55,7 @@ export class UsersService {
       birth: new Date(createUserDto.birth),
       validUntil: new Date(),
       userId: uuidv4(),
-      type: UserClass.X,
+      type: isAdminCreate ? createUserDto.type : UserClass.X,
     };
 
     if (!this.businessValidateService.isUserAgeValid(userProfile.birth))
@@ -81,38 +81,38 @@ export class UsersService {
     }
   }
 
-  async createByAdmin(createUserDto: CreateUserDto, type: UserClass) {
-    let validPeriod = this.rulesService.getRule(
-      'VALID_PERIOD_BY_DAY_OF_USER_ACCOUNT',
-    );
-    if (!validPeriod) throw new Error();
-    if (
-      await this.usersRepository.findOneBy({
-        username: createUserDto.username,
-        isActive: true,
-      })
-    )
-      throw new HttpException('Username is already taken', HttpStatus.CONFLICT);
+  // async createByAdmin(createUserDto: CreateUserDto, type: UserClass) {
+  //   let validPeriod = this.rulesService.getRule(
+  //     'VALID_PERIOD_BY_DAY_OF_USER_ACCOUNT',
+  //   );
+  //   if (!validPeriod) throw new Error();
+  //   if (
+  //     await this.usersRepository.findOneBy({
+  //       username: createUserDto.username,
+  //       isActive: true,
+  //     })
+  //   )
+  //     throw new HttpException('Username is already taken', HttpStatus.CONFLICT);
 
-    const userProfile = {
-      ...createUserDto,
-      validUntil: new Date(),
-      userId: uuidv4(),
-      type,
-    };
-    userProfile.validUntil.setDate(
-      userProfile.validUntil.getDate() + parseInt(validPeriod),
-    );
+  //   const userProfile = {
+  //     ...createUserDto,
+  //     validUntil: new Date(),
+  //     userId: uuidv4(),
+  //     type,
+  //   };
+  //   userProfile.validUntil.setDate(
+  //     userProfile.validUntil.getDate() + parseInt(validPeriod),
+  //   );
 
-    const hashedPassword = bcrypt.hashSync(
-      createUserDto.password,
-      this.salt || 15,
-    );
-    await this.usersRepository.insert({
-      ...userProfile,
-      password: hashedPassword,
-    });
-  }
+  //   const hashedPassword = bcrypt.hashSync(
+  //     createUserDto.password,
+  //     this.salt || 15,
+  //   );
+  //   await this.usersRepository.insert({
+  //     ...userProfile,
+  //     password: hashedPassword,
+  //   });
+  // }
 
   async findAll() {
     let users: User[] = await this.usersRepository.find();

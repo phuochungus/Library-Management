@@ -36,10 +36,7 @@ export class UsersController {
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async createByAdmin(@Body() createUserDto: CreateUserDto) {
-    return await this.usersService.createByAdmin(
-      createUserDto,
-      createUserDto.type,
-    );
+    return await this.usersService.create(createUserDto, true);
   }
 
   @Get()
