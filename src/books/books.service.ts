@@ -133,7 +133,7 @@ export class BooksService {
     if (book)
       return {
         ...book,
-        isAvaileble: this.businessValidateService.isBookAvailable(book),
+        isAvailable: this.businessValidateService.isBookAvailable(book),
       };
     throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
   }
