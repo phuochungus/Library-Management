@@ -81,39 +81,6 @@ export class UsersService {
     }
   }
 
-  // async createByAdmin(createUserDto: CreateUserDto, type: UserClass) {
-  //   let validPeriod = this.rulesService.getRule(
-  //     'VALID_PERIOD_BY_DAY_OF_USER_ACCOUNT',
-  //   );
-  //   if (!validPeriod) throw new Error();
-  //   if (
-  //     await this.usersRepository.findOneBy({
-  //       username: createUserDto.username,
-  //       isActive: true,
-  //     })
-  //   )
-  //     throw new HttpException('Username is already taken', HttpStatus.CONFLICT);
-
-  //   const userProfile = {
-  //     ...createUserDto,
-  //     validUntil: new Date(),
-  //     userId: uuidv4(),
-  //     type,
-  //   };
-  //   userProfile.validUntil.setDate(
-  //     userProfile.validUntil.getDate() + parseInt(validPeriod),
-  //   );
-
-  //   const hashedPassword = bcrypt.hashSync(
-  //     createUserDto.password,
-  //     this.salt || 15,
-  //   );
-  //   await this.usersRepository.insert({
-  //     ...userProfile,
-  //     password: hashedPassword,
-  //   });
-  // }
-
   async findAll() {
     let users: User[] = await this.usersRepository.find();
     return users;
@@ -135,9 +102,20 @@ export class UsersService {
     let user = await this.usersRepository.findOneBy({ userId: id });
     if (user) {
       user = { ...user, ...updateUserDto };
-      return await this.usersRepository.save(user);
+      try {
+        return await this.usersRepository.save(user);
+      } catch (error) {
+        if (error.errno == 1062)
+          throw new ConflictException('Username or email already taken');
+        throw error;
+      }
     }
     if (!user) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    if (
+      updateUserDto.birth &&
+      !this.businessValidateService.isUserAgeValid(updateUserDto.birth)
+    )
+      throw new ConflictException('User age not available');
   }
 
   async remove(id: string) {

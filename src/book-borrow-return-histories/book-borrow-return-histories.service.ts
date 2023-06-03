@@ -53,4 +53,8 @@ export class BookBorrowReturnHistoriesService {
 
     return { sessionInfo, info: histories };
   }
+  
+  async getAll() {
+    return await this.bookBorrowReturnHistoriesRepository.find();
+  }
 }
