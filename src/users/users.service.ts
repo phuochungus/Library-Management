@@ -23,6 +23,7 @@ import BusinessValidateService from 'src/business-validate/business-validate.ser
 import Book from 'src/entities/Book';
 import Admin from 'src/entities/Admin';
 import { Repository } from 'typeorm';
+import * as _ from 'lodash';
 
 @Injectable()
 export class UsersService {
@@ -45,10 +46,14 @@ export class UsersService {
     );
     if (!validPeriod) throw new Error();
     if (
-      await this.usersRepository.findOneBy({
+      (await this.usersRepository.findOneBy({
         username: createUserDto.username,
         isActive: true,
-      })
+      })) ||
+      (await this.adminsRepository.findOneBy({
+        username: createUserDto.username,
+        isActive: true,
+      }))
     )
       throw new HttpException('Username is already taken', HttpStatus.CONFLICT);
 
@@ -102,10 +107,31 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    let user =
-      (await this.usersRepository.findOneBy({ userId: id })) ||
-      (await this.adminsRepository.findOneBy({ adminId: id }));
+    let user = await this.findOne(id);
+    let isExisted =
+      ((await this.usersRepository.findOne({
+        where: [
+          {
+            username: updateUserDto.username,
+          },
+          {
+            email: updateUserDto.email,
+          },
+        ],
+      })) ||
+        (await this.adminsRepository.findOne({
+          where: [
+            {
+              username: updateUserDto.username,
+            },
+            {
+              email: updateUserDto.email,
+            },
+          ],
+        }))) != null;
     if (!user) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    if (isExisted)
+      throw new ConflictException('Username or email already taken');
     if (
       updateUserDto.birth &&
       !this.businessValidateService.isUserAgeValid(updateUserDto.birth)
@@ -113,10 +139,11 @@ export class UsersService {
       throw new ConflictException('User age not available');
 
     if (user) {
-      user = { ...user, ...updateUserDto };
+      _.assign(user, updateUserDto);
       try {
         if (user instanceof User) return await this.usersRepository.save(user);
-        else return await this.adminsRepository.save(user);
+        else if (user instanceof Admin)
+          return await this.adminsRepository.save(user);
       } catch (error) {
         if (error.errno == 1062)
           throw new ConflictException('Username or email already taken');

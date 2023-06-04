@@ -20,7 +20,7 @@ export enum UserClass {
 }
 
 @Entity()
-@Index(['username', 'isActive'], { unique: true })
+@Index(['username', 'isActive', 'email'], { unique: true })
 export default class User extends Person implements TimeStampImp {
   @PrimaryColumn()
   userId: string;

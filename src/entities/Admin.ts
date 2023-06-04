@@ -11,7 +11,7 @@ import { Person } from './Person';
 import TimeStampImp from './TimeStamp';
 
 @Entity()
-@Index(['username', 'isActive'], { unique: true })
+@Index(['username', 'isActive', 'email'], { unique: true })
 export default class Admin extends Person implements TimeStampImp {
   @PrimaryColumn()
   adminId: string;
