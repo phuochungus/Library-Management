@@ -22,7 +22,7 @@ import { randomBytes } from 'crypto';
 import BusinessValidateService from 'src/business-validate/business-validate.service';
 import Book from 'src/entities/Book';
 import Admin from 'src/entities/Admin';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import * as _ from 'lodash';
 
 @Injectable()
@@ -112,9 +112,11 @@ export class UsersService {
       ((await this.usersRepository.findOne({
         where: [
           {
+            userId: Not(id),
             username: updateUserDto.username,
           },
           {
+            userId: Not(id),
             email: updateUserDto.email,
           },
         ],
@@ -122,9 +124,11 @@ export class UsersService {
         (await this.adminsRepository.findOne({
           where: [
             {
+              adminId: Not(id),
               username: updateUserDto.username,
             },
             {
+              adminId: Not(id),
               email: updateUserDto.email,
             },
           ],
