@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import User, { UserClass } from 'src/entities/User';
-import { Repository } from 'typeorm';
 import CreateUserDto from './dto/create-user.dto';
 import UpdateUserDto from './dto/update-user.dto';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,12 +21,15 @@ import { MailService } from 'src/mail/mail.service';
 import { randomBytes } from 'crypto';
 import BusinessValidateService from 'src/business-validate/business-validate.service';
 import Book from 'src/entities/Book';
+import Admin from 'src/entities/Admin';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
     @InjectRepository(Book) private booksRepository: Repository<Book>,
+    @InjectRepository(Admin) private adminsRepository: Repository<Admin>,
 
     private rulesService: RulesService,
     private configService: ConfigService,
@@ -87,19 +89,22 @@ export class UsersService {
   }
 
   async findOne(id: string) {
-    let user: User | null = await this.usersRepository.findOne({
-      where: { userId: id },
-      relations: {
-        bookShelf: true,
-        books: true,
-      },
-    });
+    let user =
+      (await this.usersRepository.findOne({
+        where: { userId: id },
+        relations: {
+          bookShelf: true,
+          books: true,
+        },
+      })) || (await this.adminsRepository.findOne({ where: { adminId: id } }));
     if (user) return user;
     throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    let user = await this.usersRepository.findOneBy({ userId: id });4
+    let user =
+      (await this.usersRepository.findOneBy({ userId: id })) ||
+      (await this.adminsRepository.findOneBy({ adminId: id }));
     if (!user) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
     if (
       updateUserDto.birth &&
@@ -110,7 +115,8 @@ export class UsersService {
     if (user) {
       user = { ...user, ...updateUserDto };
       try {
-        return await this.usersRepository.save(user);
+        if (user instanceof User) return await this.usersRepository.save(user);
+        else return await this.adminsRepository.save(user);
       } catch (error) {
         if (error.errno == 1062)
           throw new ConflictException('Username or email already taken');

@@ -10,11 +10,12 @@ import { RulesModule } from 'src/rules/rules.module';
 import { MailModule } from 'src/mail/mail.module';
 import { BusinessValidateModule } from 'src/business-validate/business-validate.module';
 import Book from 'src/entities/Book';
+import Admin from 'src/entities/Admin';
 
 @Module({
   imports: [
     MailModule,
-    TypeOrmModule.forFeature([User, Book]),
+    TypeOrmModule.forFeature([User, Book, Admin]),
     BookBorrowRecordsModule,
     BookReturnRecordsModule,
     FineReceiptsModule,
