@@ -9,7 +9,7 @@ import User from 'src/entities/User';
 import { RulesService } from 'src/rules/rules.service';
 
 @Injectable()
-export default class BusinessValidateService {
+export class BusinessValidateService {
   constructor(private rulesListenerService: RulesService) {}
 
   async isUserAbleToMakeBorrowRequest(user: User): Promise<boolean> {
@@ -93,7 +93,7 @@ export default class BusinessValidateService {
       )
     )
       throw new ConflictException('Book not available for user');
-      
+
     if (!this.isBookPublicationYearValid(book.publishYear))
       throw new ConflictException(
         'Book publication year too old, can not borrow such old book for presevation policy',

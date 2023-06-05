@@ -1,11 +1,10 @@
-import { Controller } from '@nestjs/common';
-import { Body, Get, Patch, UseGuards } from '@nestjs/common/decorators';
+import { Controller, UseGuards, Patch, Body, Get } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/authentication/jwt-auth.guard';
+import { Role } from '../auth/authorization/role.enum';
+import { Roles } from '../auth/authorization/roles.decorator';
+import { RolesGuard } from '../auth/authorization/roles.guard';
 import UpdateRuleDto from './dto/update-rule.dto';
 import { RulesService } from './rules.service';
-import { Roles } from 'src/auth/authorization/roles.decorator';
-import { JwtAuthGuard } from 'src/auth/authentication/jwt-auth.guard';
-import { Role } from 'src/auth/authorization/role.enum';
-import { RolesGuard } from 'src/auth/authorization/roles.guard';
 
 @Controller('rules')
 export class RulesController {

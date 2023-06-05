@@ -1,14 +1,14 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import BusinessValidateService from 'src/business-validate/business-validate.service';
-import Book from 'src/entities/Book';
-import BookBorrowRecord from 'src/entities/BookBorrowRecord';
-import User from 'src/entities/User';
-import { RulesService } from 'src/rules/rules.service';
-import { DeepPartial, In, MongoRepository, Repository } from 'typeorm';
+import { MongoRepository, Repository, In, DeepPartial } from 'typeorm';
+import { BusinessValidateService } from '../business-validate/business-validate.service';
+import Book from '../entities/Book';
+import BookBorrowRecord from '../entities/BookBorrowRecord';
+import BookBorrowReturnHistory from '../entities/BookBorrowReturnHistory';
+import BookBorrowSession from '../entities/BookBorrowSession';
+import User from '../entities/User';
+import { RulesService } from '../rules/rules.service';
 import { CreateBookBorrowRecordDto } from './dto/create-book-borrow-record.dto';
-import BookBorrowReturnHistory from 'src/entities/BookBorrowReturnHistory';
-import BookBorrowSession from 'src/entities/BookBorrowSession';
 
 @Injectable()
 export class BookBorrowRecordsService {
@@ -39,10 +39,10 @@ export class BookBorrowRecordsService {
       relations: { user: true, genres: true },
     });
 
-    const maximumBorrowDay = this.rulesService.getRule('DUE_BY_DAYS');
-    if (!maximumBorrowDay)
+    const borrowDue = this.rulesService.getRule('BORROW_DUE');
+    if (!borrowDue)
       throw new HttpException(
-        'There is an error occurred',
+        'There is an error occurred, missing borrow due value in database',
         HttpStatus.BAD_GATEWAY,
       );
 
@@ -79,7 +79,7 @@ export class BookBorrowRecordsService {
         this.makeBookUnavailableForUser(
           books[index],
           user,
-          parseInt(maximumBorrowDay),
+          parseInt(borrowDue),
           now,
         );
         resultPromises = [

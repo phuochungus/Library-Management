@@ -5,8 +5,8 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import Rule from 'src/entities/Rule';
 import { MongoEntityManager, MongoRepository } from 'typeorm';
+import Rule from '../entities/Rule';
 
 @Injectable()
 export class RulesService implements OnModuleInit {

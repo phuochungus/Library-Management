@@ -19,7 +19,7 @@ import { ConfigService } from '@nestjs/config';
 import ResetPasswordDTO from './dto/reset-password.dto';
 import { MailService } from 'src/mail/mail.service';
 import { randomBytes } from 'crypto';
-import BusinessValidateService from 'src/business-validate/business-validate.service';
+import { BusinessValidateService } from 'src/business-validate/business-validate.service';
 import Book from 'src/entities/Book';
 import Admin from 'src/entities/Admin';
 import { Not, Repository } from 'typeorm';
