@@ -93,14 +93,14 @@ export class RulesController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
-  @Patch('/due_by_days')
+  @Patch('/borrow_interval')
   async updateDueByDaysOfBorrow(@Body() updateRuleDto: UpdateRuleDto) {
-    await this.rulesService.updateRule('DUE_BY_DAYS', updateRuleDto.value);
+    await this.rulesService.updateRule('BORROW_INTERVAL', updateRuleDto.value);
   }
 
-  @Get('/due_by_days')
+  @Get('/borrow_interval')
   getDueByDaysOfBorrow() {
-    return this.rulesService.getRule('DUE_BY_DAYS');
+    return this.rulesService.getRule('BORROW_INTERVAL');
   }
 
   @Get('/reserve_day')

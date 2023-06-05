@@ -53,7 +53,7 @@ export default class BusinessValidateService {
     numberOfBookAboutTobeBorrow = 0,
   ): boolean {
     const borrowMaxValue = this.rulesListenerService.getRule('BORROW_MAX');
-    const borrowDueValue = this.rulesListenerService.getRule('DUE_BY_DAYS');
+    const borrowDueValue = this.rulesListenerService.getRule('BORROW_INTERVAL');
     if (borrowMaxValue && borrowDueValue) {
       const borrowMax = parseInt(borrowMaxValue);
       const borrowDueByDays = parseInt(borrowDueValue);
