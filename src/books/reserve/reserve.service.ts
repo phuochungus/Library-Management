@@ -3,13 +3,14 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
+  BadGatewayException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import BusinessValidateService from 'src/business-validate/business-validate.service';
 import Book from 'src/entities/Book';
 import User from 'src/entities/User';
 import { RulesService } from 'src/rules/rules.service';
-import { Repository } from 'typeorm';
+import { In, IsNull, Not, Repository } from 'typeorm';
 
 @Injectable()
 export class ReserveService {
@@ -68,5 +69,73 @@ export class ReserveService {
       book.reservedDate = null;
       await this.booksRepository.save(book);
     }
+  }
+
+  async ReserveMultibleBook(userId: string, bookIds: string[]) {
+    let user = await this.usersRepository.findOneBy({
+      userId,
+    });
+    if (!user) throw new NotFoundException('User not found');
+    let books = await this.booksRepository.find({
+      where: {
+        bookId: In(bookIds),
+        reservedDate: IsNull(),
+      },
+    });
+
+    if (books.length != bookIds.length) {
+      throw new NotFoundException('Some book not found or not available');
+    }
+
+    const rawReserveDay = this.rulesService.getRule('RESERVE_DAY');
+    if (!rawReserveDay) throw new BadGatewayException();
+
+    const reserveDay = parseInt(rawReserveDay);
+
+    const MILISECOND_PER_DAY = 24 * 60 * 60 * 1000;
+
+    let nowInMilisec = new Date().getTime();
+
+    for (let index in books) {
+      books[index].reservedDate = new Date(nowInMilisec);
+      books[index].dueDate = new Date(
+        nowInMilisec + MILISECOND_PER_DAY * reserveDay,
+      );
+      books[index].user = user;
+    }
+    return await this.booksRepository.save(books);
+  }
+
+  async cancelReserveMultible(userId: string, bookIds: string[]) {
+    let user = await this.usersRepository.findOneBy({
+      userId,
+    });
+    if (!user) throw new NotFoundException('User not found');
+    let books = await this.booksRepository.find({
+      where: {
+        bookId: In(bookIds),
+        user: {
+          userId,
+        },
+      },
+    });
+
+    books.forEach((book) => {
+      book.user = null;
+      book.reservedDate = null;
+      book.dueDate = null;
+    });
+    return await this.booksRepository.save(books);
+  }
+
+  async getReserveBook(userId: string) {
+    return await this.booksRepository.find({
+      where: {
+        user: {
+          userId,
+        },
+        reservedDate: Not(IsNull()),
+      },
+    });
   }
 }
