@@ -77,9 +77,12 @@ export class UsersService {
       this.salt || 15,
     );
     try {
-      await this.usersRepository.insert({
+      let result = await this.usersRepository.insert({
         ...userProfile,
         password: hashedPassword,
+      });
+      return await this.usersRepository.findOneBy({
+        userId: result.identifiers[0].userId,
       });
     } catch (error) {
       if (error.code == 'ER_DUP_ENTRY')

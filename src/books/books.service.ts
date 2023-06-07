@@ -36,14 +36,14 @@ export class BooksService {
     )
       throw new ConflictException('Book publish year not available');
 
-    await this.booksRepository.insert(bookProfile);
+    let t = await this.booksRepository.insert(bookProfile);
     const genres: Genre[] = await this.genresRepository.findBy({
       genreId: In(genreIds),
     });
     let book = await this.booksRepository.findOneBy({ bookId });
     if (!book) throw new BadGatewayException();
     book.genres = genres;
-    await this.booksRepository.save(book);
+    return await this.booksRepository.save(book);
   }
 
   async findAll(): Promise<Book[]> {

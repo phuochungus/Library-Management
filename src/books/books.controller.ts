@@ -32,7 +32,7 @@ export class BooksController {
 
   @Post()
   async create(@Body() createBookDto: CreateBookDto) {
-    await this.booksService.create(createBookDto);
+    return await this.booksService.create(createBookDto);
   }
 
   //done
