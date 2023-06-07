@@ -22,7 +22,7 @@ import { randomBytes } from 'crypto';
 import BusinessValidateService from 'src/business-validate/business-validate.service';
 import Book from 'src/entities/Book';
 import Admin from 'src/entities/Admin';
-import { Not, Repository } from 'typeorm';
+import { IsNull, MoreThan, Not, Repository } from 'typeorm';
 import * as _ from 'lodash';
 
 @Injectable()
@@ -208,26 +208,27 @@ export class UsersService {
     }
   }
 
-  async findAllReservedBook(id: string) {
-    const user = await this.usersRepository.findOne({
-      where: { userId: id },
+  async findAllReservedBook(userId: string) {
+    let now = new Date();
+
+    let books = await this.booksRepository.find({
+      where: {
+        user: {
+          userId,
+        },
+        borrowedDate: IsNull(),
+        reservedDate: Not(IsNull()),
+        dueDate: MoreThan(now),
+      },
     });
 
-    if (!user) throw new NotFoundException('User not found');
-
-    let books = await user.books;
-
-    books = books.filter((e) => e.borrowedDate == null);
-
-    let newBookObj = books.map((e) => {
+    return books.map((e) => {
       return {
         ...e,
         remainReserveTime:
           (e.dueDate!.getTime() - Date.now()) / (60 * 60 * 1000),
       };
     });
-
-    return newBookObj.filter((e) => e.remainReserveTime > 0);
   }
 
   async getAllBorrowing(id: any) {
