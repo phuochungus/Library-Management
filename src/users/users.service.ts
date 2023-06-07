@@ -201,6 +201,10 @@ export class UsersService {
       user.password = hashedPassword;
       await this.usersRepository.save(user);
       this.mailService.sendNewPassword(resetPasswordDto.email, randomPassword);
+    } else {
+      throw new NotFoundException(
+        'Not found account with provided username and email',
+      );
     }
   }
 
