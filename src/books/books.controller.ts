@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Query,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
@@ -32,7 +33,8 @@ export class BooksController {
 
   @Post()
   async create(@Body() createBookDto: CreateBookDto) {
-    return await this.booksService.create(createBookDto);
+    const book = await this.booksService.create(createBookDto);
+    return { ...book, isAvailable: true };
   }
 
   //done
