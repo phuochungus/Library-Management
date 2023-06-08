@@ -179,6 +179,10 @@ export class UsersService {
     if (!user) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     if (user.userId != userIdMakeThisAction) throw new UnauthorizedException();
     if (bcrypt.compareSync(updatePasswordDto.password, user.password)) {
+      if (updatePasswordDto.newPassword == updatePasswordDto.password)
+        throw new ConflictException(
+          'New password can not be same as old password',
+        );
       user.password = bcrypt.hashSync(
         updatePasswordDto.newPassword,
         this.salt || 15,

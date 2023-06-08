@@ -69,7 +69,7 @@ export class UsersController {
   async updatePassword(
     @Request() req,
     @Body() updatePasswordDto: UpdatePasswordDto,
-  ): Promise<void> {
+  ) {
     await this.usersService.updatePassword(updatePasswordDto, req.user.id);
   }
 
