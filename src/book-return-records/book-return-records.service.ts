@@ -1,15 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import BusinessValidateService from 'src/business-validate/business-validate.service';
+import { BusinessValidateService } from 'src/business-validate/business-validate.service';
 import Book from 'src/entities/Book';
 import BookReturnRecord from 'src/entities/BookReturnRecord';
 import User from 'src/entities/User';
 import { RulesService } from 'src/rules/rules.service';
 import { DeepPartial, In, MongoRepository, Repository } from 'typeorm';
 import { CreateBookReturnRecordDto } from './dto/create-book-return-record.dto';
-import { v4 as uuid4 } from 'uuid';
-import { use } from 'passport';
-import { result } from 'lodash';
 import BookReturnSession from 'src/entities/BookReturnSession';
 import BookBorrowReturnHistory from 'src/entities/BookBorrowReturnHistory';
 

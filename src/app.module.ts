@@ -1,4 +1,3 @@
-import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -32,6 +31,7 @@ import BookReturnSession from './entities/BookReturnSession';
 import BookBorrowReturnHistory from './entities/BookBorrowReturnHistory';
 import BookBorrowSession from './entities/BookBorrowSession';
 import { BookBorrowReturnHistoriesModule } from './book-borrow-return-histories/book-borrow-return-histories.module';
+import { Module } from '@nestjs/common';
 
 @Module({
   imports: [

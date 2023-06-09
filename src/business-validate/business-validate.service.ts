@@ -1,15 +1,16 @@
 import {
+  Injectable,
   ConflictException,
   HttpException,
   HttpStatus,
-  Injectable,
 } from '@nestjs/common';
-import Book from 'src/entities/Book';
-import User from 'src/entities/User';
-import { RulesService } from 'src/rules/rules.service';
+import Book from '../entities/Book';
+import User from '../entities/User';
+import { RulesService } from '../rules/rules.service';
+import { isInt } from 'class-validator';
 
 @Injectable()
-export default class BusinessValidateService {
+export class BusinessValidateService {
   constructor(private rulesListenerService: RulesService) {}
 
   async isUserAbleToMakeBorrowRequest(user: User): Promise<boolean> {
@@ -20,7 +21,9 @@ export default class BusinessValidateService {
       throw new ConflictException('User age not supported');
 
     if (this.isUserReachBorrowLimit(userBooks))
-      throw new ConflictException('User reach borrow limit');
+      throw new ConflictException(
+        'User reach borrow limit within this interval of time, try again later',
+      );
 
     if (!this.isUserAccountValid(user.validUntil))
       throw new ConflictException('User account is expired');
@@ -53,21 +56,35 @@ export default class BusinessValidateService {
     numberOfBookAboutTobeBorrow = 0,
   ): boolean {
     const borrowMaxValue = this.rulesListenerService.getRule('BORROW_MAX');
-    const borrowDueValue = this.rulesListenerService.getRule('DUE_BY_DAYS');
+    const borrowDueValue = this.rulesListenerService.getRule('BORROW_INTERVAL');
     if (borrowMaxValue && borrowDueValue) {
       const borrowMax = parseInt(borrowMaxValue);
-      const borrowDueByDays = parseInt(borrowDueValue);
-      const DAY_IN_MILISECOND = 24 * 60 * 60 * 1000;
+      const borrowInterval = parseInt(borrowDueValue);
       let count = numberOfBookAboutTobeBorrow;
-      const dateInPast = new Date(
-        Date.now() - borrowDueByDays * DAY_IN_MILISECOND,
+      const firstDayOfInterval = this.findFirstDayInInterval(
+        Date.now(),
+        borrowInterval,
       );
+
       for (let book of books) {
         let date = book.borrowedDate || book.reservedDate;
-        if (date!.getTime() > dateInPast.getTime()) count++;
+        if (date!.getTime() > firstDayOfInterval.getTime()) count++;
       }
       return count >= borrowMax;
     } else throw new HttpException('Bad gatewat', HttpStatus.BAD_GATEWAY);
+  }
+
+  findFirstDayInInterval(
+    anyDayFromIntervalInMilisec: number,
+    interval: number,
+  ) {
+    if (!isInt(interval))
+      throw new ConflictException('Interval must be integer');
+    const MILISECOND_IN_ONE_DAY = 24 * 60 * 60 * 1000;
+    const MILISECOND_IN_INTERVAL = interval * MILISECOND_IN_ONE_DAY;
+    const milisecPassedInInterval =
+      anyDayFromIntervalInMilisec % MILISECOND_IN_INTERVAL;
+    return new Date(anyDayFromIntervalInMilisec - milisecPassedInInterval);
   }
 
   isUserAccountValid(validUntil: Date): boolean {
@@ -93,7 +110,7 @@ export default class BusinessValidateService {
       )
     )
       throw new ConflictException('Book not available for user');
-      
+
     if (!this.isBookPublicationYearValid(book.publishYear))
       throw new ConflictException(
         'Book publication year too old, can not borrow such old book for presevation policy',

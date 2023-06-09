@@ -8,11 +8,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import Book from 'src/entities/Book';
 import User from 'src/entities/User';
 import { In, Repository } from 'typeorm';
-import { CreateBookShelfDto } from './dto/create-book-shelf.dto';
 import _ from 'lodash';
-import BusinessValidateService from 'src/business-validate/business-validate.service';
-import { RulesService } from 'src/rules/rules.service';
-import { RemoveBookShelfDto } from './dto/remove-book-shelf.dto';
+import { BusinessValidateService } from 'src/business-validate/business-validate.service';
 
 @Injectable()
 export class BookShelfService {

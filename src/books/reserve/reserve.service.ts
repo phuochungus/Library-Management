@@ -6,7 +6,7 @@ import {
   BadGatewayException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import BusinessValidateService from 'src/business-validate/business-validate.service';
+import { BusinessValidateService } from 'src/business-validate/business-validate.service';
 import Book from 'src/entities/Book';
 import User from 'src/entities/User';
 import { RulesService } from 'src/rules/rules.service';

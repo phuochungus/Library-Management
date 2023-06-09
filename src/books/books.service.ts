@@ -12,7 +12,7 @@ import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { v4 as uuidv4 } from 'uuid';
 import Genre from 'src/entities/Genre';
-import BusinessValidateService from 'src/business-validate/business-validate.service';
+import { BusinessValidateService } from 'src/business-validate/business-validate.service';
 
 @Injectable()
 export class BooksService {
