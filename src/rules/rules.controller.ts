@@ -103,8 +103,39 @@ export class RulesController {
     return this.rulesService.getRule('DUE_BY_DAYS');
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Patch('/reserve_day')
+  async updateReserveDay(@Body() updateRuleDto: UpdateRuleDto) {
+    await this.rulesService.updateRule('RESERVE_DAY', updateRuleDto.value);
+  }
+
   @Get('/reserve_day')
   async getReserveDay() {
     return this.rulesService.getRule('RESERVE_DAY');
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Patch('/borrow_due')
+  async updateBorrowDue(@Body() updateRuleDto: UpdateRuleDto) {
+    await this.rulesService.updateRule('BORROW_DUE', updateRuleDto.value);
+  }
+
+  @Get('/borrow_due')
+  async getBorrowDue() {
+    return this.rulesService.getRule('BORROW_DUE');
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Patch('/borrow_interval')
+  async updateBorrowInterval(@Body() updateRuleDto: UpdateRuleDto) {
+    await this.rulesService.updateRule('BORROW_INTERVAL', updateRuleDto.value);
+  }
+
+  @Get('/borrow_interval')
+  async getBorrowInterval() {
+    return this.rulesService.getRule('BORROW_INTERVAL');
   }
 }
