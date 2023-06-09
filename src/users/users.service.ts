@@ -168,36 +168,36 @@ export class UsersService {
     await this.usersRepository.softDelete({ userId: id });
   }
 
-  async updatePassword(
-    updatePasswordDto: UpdatePasswordDto,
-    userIdMakeThisAction: string,
-    isAdmin: boolean = false,
-  ) {
-    let user;
-    if (isAdmin)
-      user = await this.adminsRepository.findOne({
-        where: { username: updatePasswordDto.username },
-      });
-    else
+  async updatePassword(updatePasswordDto: UpdatePasswordDto) {
+    let user: User | Admin | null = await this.adminsRepository.findOne({
+      where: { username: updatePasswordDto.username },
+      select: {
+        password: true,
+        adminId: true,
+      },
+    });
+    if (!user)
       user = await this.usersRepository.findOne({
         where: { username: updatePasswordDto.username },
+        select: {
+          password: true,
+          userId: true,
+        },
       });
 
     if (!user) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
-    if (user.userId != userIdMakeThisAction) throw new UnauthorizedException();
-    if (bcrypt.compareSync(updatePasswordDto.password, user.password)) {
-      if (updatePasswordDto.newPassword == updatePasswordDto.password)
-        throw new ConflictException(
-          'New password can not be same as old password',
-        );
-      user.password = bcrypt.hashSync(
-        updatePasswordDto.newPassword,
-        this.salt || 15,
+    if (!bcrypt.compareSync(updatePasswordDto.password, user.password))
+      throw new HttpException('Password not correct', HttpStatus.CONFLICT);
+    if (updatePasswordDto.newPassword == updatePasswordDto.password)
+      throw new ConflictException(
+        'New password can not be same as old password',
       );
-      await this.usersRepository.save(user);
-      return;
-    }
-    throw new HttpException('Password not correct', HttpStatus.CONFLICT);
+    user.password = bcrypt.hashSync(
+      updatePasswordDto.newPassword,
+      this.salt || 15,
+    );
+    if (user instanceof User) await this.usersRepository.save(user);
+    else if (user instanceof Admin) await this.adminsRepository.save(user);
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDTO) {

@@ -65,18 +65,13 @@ export class UsersController {
   }
 
   @Put('/password')
-  @Roles(Role.Admin, Role.User)
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(Role.Admin, Role.User)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   async updatePassword(
     @Request() req,
     @Body() updatePasswordDto: UpdatePasswordDto,
-    @Body('isAdmin', ParseBoolPipe) isAdmin,
   ) {
-    await this.usersService.updatePassword(
-      updatePasswordDto,
-      req.user.id,
-      isAdmin,
-    );
+    await this.usersService.updatePassword(updatePasswordDto);
   }
 
   @Put('/password_reset')
