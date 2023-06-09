@@ -86,7 +86,7 @@ export class RulesController {
     );
   }
 
-  @Get('/fine_per_day')
+  @Get('/valid_period_of_user')
   getValidPeriodByDayOfUserAccount() {
     return this.rulesService.getRule('VALID_PERIOD_BY_DAY_OF_USER_ACCOUNT');
   }
