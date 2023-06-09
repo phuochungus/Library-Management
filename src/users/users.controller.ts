@@ -11,6 +11,7 @@ import {
   UseGuards,
   Request,
   Req,
+  ParseBoolPipe,
 } from '@nestjs/common';
 import CreateUserDto from './dto/create-user.dto';
 import UpdatePasswordDto from './dto/update-password.dto';
@@ -69,8 +70,13 @@ export class UsersController {
   async updatePassword(
     @Request() req,
     @Body() updatePasswordDto: UpdatePasswordDto,
+    @Body('isAdmin', ParseBoolPipe) isAdmin,
   ) {
-    await this.usersService.updatePassword(updatePasswordDto, req.user.id);
+    await this.usersService.updatePassword(
+      updatePasswordDto,
+      req.user.id,
+      isAdmin,
+    );
   }
 
   @Put('/password_reset')

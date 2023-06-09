@@ -171,11 +171,18 @@ export class UsersService {
   async updatePassword(
     updatePasswordDto: UpdatePasswordDto,
     userIdMakeThisAction: string,
+    isAdmin: boolean = false,
   ) {
-    let user = await this.usersRepository.findOne({
-      where: { username: updatePasswordDto.username },
-      select: { userId: true, password: true },
-    });
+    let user;
+    if (isAdmin)
+      user = await this.adminsRepository.findOne({
+        where: { username: updatePasswordDto.username },
+      });
+    else
+      user = await this.usersRepository.findOne({
+        where: { username: updatePasswordDto.username },
+      });
+
     if (!user) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     if (user.userId != userIdMakeThisAction) throw new UnauthorizedException();
     if (bcrypt.compareSync(updatePasswordDto.password, user.password)) {
