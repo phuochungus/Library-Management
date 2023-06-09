@@ -85,7 +85,7 @@ export class RulesController {
     );
   }
 
-  @Get('/fine_per_day')
+  @Get('/valid_period_of_user')
   getValidPeriodByDayOfUserAccount() {
     return this.rulesService.getRule('VALID_PERIOD_BY_DAY_OF_USER_ACCOUNT');
   }
@@ -102,8 +102,39 @@ export class RulesController {
     return this.rulesService.getRule('BORROW_INTERVAL');
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Patch('/reserve_day')
+  async updateReserveDay(@Body() updateRuleDto: UpdateRuleDto) {
+    await this.rulesService.updateRule('RESERVE_DAY', updateRuleDto.value);
+  }
+
   @Get('/reserve_day')
   async getReserveDay() {
     return this.rulesService.getRule('RESERVE_DAY');
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Patch('/borrow_due')
+  async updateBorrowDue(@Body() updateRuleDto: UpdateRuleDto) {
+    await this.rulesService.updateRule('BORROW_DUE', updateRuleDto.value);
+  }
+
+  @Get('/borrow_due')
+  async getBorrowDue() {
+    return this.rulesService.getRule('BORROW_DUE');
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Patch('/borrow_interval')
+  async updateBorrowInterval(@Body() updateRuleDto: UpdateRuleDto) {
+    await this.rulesService.updateRule('BORROW_INTERVAL', updateRuleDto.value);
+  }
+
+  @Get('/borrow_interval')
+  async getBorrowInterval() {
+    return this.rulesService.getRule('BORROW_INTERVAL');
   }
 }

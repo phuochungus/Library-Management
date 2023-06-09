@@ -22,7 +22,7 @@ import { randomBytes } from 'crypto';
 import { BusinessValidateService } from 'src/business-validate/business-validate.service';
 import Book from 'src/entities/Book';
 import Admin from 'src/entities/Admin';
-import { Not, Repository } from 'typeorm';
+import { IsNull, MoreThan, Not, Repository } from 'typeorm';
 import * as _ from 'lodash';
 
 @Injectable()
@@ -77,9 +77,12 @@ export class UsersService {
       this.salt || 15,
     );
     try {
-      await this.usersRepository.insert({
+      let result = await this.usersRepository.insert({
         ...userProfile,
         password: hashedPassword,
+      });
+      return await this.usersRepository.findOneBy({
+        userId: result.identifiers[0].userId,
       });
     } catch (error) {
       if (error.code == 'ER_DUP_ENTRY')
@@ -168,14 +171,25 @@ export class UsersService {
   async updatePassword(
     updatePasswordDto: UpdatePasswordDto,
     userIdMakeThisAction: string,
+    isAdmin: boolean = false,
   ) {
-    let user = await this.usersRepository.findOne({
-      where: { username: updatePasswordDto.username },
-      select: { userId: true, password: true },
-    });
+    let user;
+    if (isAdmin)
+      user = await this.adminsRepository.findOne({
+        where: { username: updatePasswordDto.username },
+      });
+    else
+      user = await this.usersRepository.findOne({
+        where: { username: updatePasswordDto.username },
+      });
+
     if (!user) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     if (user.userId != userIdMakeThisAction) throw new UnauthorizedException();
     if (bcrypt.compareSync(updatePasswordDto.password, user.password)) {
+      if (updatePasswordDto.newPassword == updatePasswordDto.password)
+        throw new ConflictException(
+          'New password can not be same as old password',
+        );
       user.password = bcrypt.hashSync(
         updatePasswordDto.newPassword,
         this.salt || 15,
@@ -198,29 +212,34 @@ export class UsersService {
       user.password = hashedPassword;
       await this.usersRepository.save(user);
       this.mailService.sendNewPassword(resetPasswordDto.email, randomPassword);
+    } else {
+      throw new NotFoundException(
+        'Not found account with provided username and email',
+      );
     }
   }
 
-  async findAllReservedBook(id: string) {
-    const user = await this.usersRepository.findOne({
-      where: { userId: id },
+  async findAllReservedBook(userId: string) {
+    let now = new Date();
+
+    let books = await this.booksRepository.find({
+      where: {
+        user: {
+          userId,
+        },
+        borrowedDate: IsNull(),
+        reservedDate: Not(IsNull()),
+        dueDate: MoreThan(now),
+      },
     });
 
-    if (!user) throw new NotFoundException('User not found');
-
-    let books = await user.books;
-
-    books = books.filter((e) => e.borrowedDate == null);
-
-    let newBookObj = books.map((e) => {
+    return books.map((e) => {
       return {
         ...e,
         remainReserveTime:
           (e.dueDate!.getTime() - Date.now()) / (60 * 60 * 1000),
       };
     });
-
-    return newBookObj.filter((e) => e.remainReserveTime > 0);
   }
 
   async getAllBorrowing(id: any) {

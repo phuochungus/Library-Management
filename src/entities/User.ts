@@ -61,6 +61,6 @@ export default class User extends Person implements TimeStampImp {
   @UpdateDateColumn()
   updatedDate: Date;
 
-  @DeleteDateColumn({ select: false })
+  @DeleteDateColumn()
   deleteDate?: Date;
 }

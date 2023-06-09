@@ -9,12 +9,13 @@ import {
   ParseUUIDPipe,
   Query,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import _ from 'lodash';
-import { ReserveBookDto } from './dto/reserve-book.dto';
+import { ReserveBookDTOV2, ReserveBookDto } from './dto/reserve-book.dto';
 import { ReserveService } from './reserve/reserve.service';
 import QueryBookDTO from './dto/query-book.dto';
 import { JwtAuthGuard } from 'src/auth/authentication/jwt-auth.guard';
@@ -32,7 +33,8 @@ export class BooksController {
 
   @Post()
   async create(@Body() createBookDto: CreateBookDto) {
-    await this.booksService.create(createBookDto);
+    const book = await this.booksService.create(createBookDto);
+    return { ...book, isAvailable: true };
   }
 
   //done
@@ -97,10 +99,13 @@ export class BooksController {
     );
   }
 
-  @Get('/reserve')
+  @Post('/v2/reserve')
   @UseGuards(JwtAuthGuard)
-  async getReserve() {
-    return await this.reserveService;
+  async reserveMultiple(@Req() req, @Body() reserveBookDto: ReserveBookDTOV2) {
+    return await this.reserveService.ReserveMultibleBook(
+      req.user.id,
+      reserveBookDto.bookIds,
+    );
   }
 
   @Delete('/reserve')
@@ -109,6 +114,15 @@ export class BooksController {
     await this.reserveService.cancelReserve(
       reserveBookDto.userId,
       reserveBookDto.bookId,
+    );
+  }
+
+  @Delete('/v2/reserve')
+  @UseGuards(JwtAuthGuard)
+  async cancelReserveV2(@Req() req, @Body() reserveBookDto: ReserveBookDTOV2) {
+    return await this.reserveService.cancelReserveMultible(
+      req.user.id,
+      reserveBookDto.bookIds,
     );
   }
 }

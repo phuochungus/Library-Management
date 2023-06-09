@@ -7,3 +7,8 @@ export class ReserveBookDto {
   @IsUUID()
   bookId: string;
 }
+
+export class ReserveBookDTOV2 {
+  @IsUUID(4, { each: true })
+  bookIds: string[];
+}
