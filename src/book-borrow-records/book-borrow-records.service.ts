@@ -116,16 +116,16 @@ export class BookBorrowRecordsService {
           userId,
           borrowSessionId: newSession._id,
           createdDate: now,
-          bookName: willBorrowBooks[index].name,
-          authorName: willBorrowBooks[index].author,
-          genreNames: willBorrowBooks[index].genres.map((e) => e.name),
+          bookName: joinBooks[index].name,
+          authorName: joinBooks[index].author,
+          genreNames: joinBooks[index].genres.map((e) => e.name),
         }),
       ];
       this.bookBorrowReturnHistoriesRepository.save({
         userId: userId,
-        author: willBorrowBooks[index].author,
-        bookId: willBorrowBooks[index].bookId,
-        bookName: willBorrowBooks[index].name,
+        author: joinBooks[index].author,
+        bookId: joinBooks[index].bookId,
+        bookName: joinBooks[index].name,
         borrowDate: now,
         borrowSessionId: newSession._id,
         returnDate: null,
@@ -136,7 +136,7 @@ export class BookBorrowRecordsService {
       if (parseInt(index) == willBorrowBooks.length - 1) {
         newSession.username = user.username;
         newSession.name = user.name;
-        newSession.quantity = willBorrowBooks.length;
+        newSession.quantity = joinBooks.length;
         await this.bookBorrowSessionsRepository.save(newSession);
       }
     }
