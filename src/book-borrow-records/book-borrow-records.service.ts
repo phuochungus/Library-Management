@@ -1,6 +1,19 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MongoRepository, Repository, In, DeepPartial } from 'typeorm';
+import {
+  MongoRepository,
+  Repository,
+  In,
+  DeepPartial,
+  Not,
+  IsNull,
+} from 'typeorm';
 import { BusinessValidateService } from '../business-validate/business-validate.service';
 import Book from '../entities/Book';
 import BookBorrowRecord from '../entities/BookBorrowRecord';
@@ -9,6 +22,8 @@ import BookBorrowSession from '../entities/BookBorrowSession';
 import User from '../entities/User';
 import { RulesService } from '../rules/rules.service';
 import { CreateBookBorrowRecordDto } from './dto/create-book-borrow-record.dto';
+import { NotFoundError } from 'rxjs';
+import _ from 'lodash';
 
 @Injectable()
 export class BookBorrowRecordsService {
@@ -34,10 +49,44 @@ export class BookBorrowRecordsService {
     let user = await this.usersRepository.findOne({
       where: { userId },
     });
-    let books = await this.booksRepository.find({
-      where: { bookId: In(bookIds) },
+
+    if (!user) throw new NotFoundException('User not found or deleted');
+    if (!this.businessValidateService.isUserAbleToMakeBorrowRequest(user))
+      throw new ConflictException(
+        'User unable to borrow request due to violate some rules or have pass due books',
+      );
+
+    let reservedBooks = await this.booksRepository.find({
+      where: {
+        bookId: In(bookIds),
+        user: Not(IsNull()),
+        borrowedDate: IsNull(),
+        reservedDate: Not(IsNull()),
+      },
       relations: { user: true, genres: true },
     });
+
+    let willBorrowBooks = await this.booksRepository.find({
+      where: {
+        bookId: In(bookIds),
+        user: IsNull(),
+        borrowedDate: IsNull(),
+        reservedDate: IsNull(),
+      },
+      relations: { user: true, genres: true },
+    });
+
+    if (willBorrowBooks.length + reservedBooks.length != bookIds.length) {
+      let diff = _.difference(
+        willBorrowBooks.map((e) => e.bookId),
+        bookIds,
+      );
+      if (diff.length > 0)
+        throw new ConflictException({
+          bookId: diff[0],
+          message: 'book not available',
+        });
+    }
 
     const borrowDue = this.rulesService.getRule('BORROW_DUE');
     if (!borrowDue)
@@ -46,88 +95,64 @@ export class BookBorrowRecordsService {
         HttpStatus.BAD_GATEWAY,
       );
 
-    if (
-      user &&
-      books.length != 0 &&
-      (await this.businessValidateService.isUserAbleToMakeBorrowRequest(
+    let resultPromises: Promise<DeepPartial<BookBorrowRecord>>[] = [];
+
+    const now = new Date();
+    let newSession = await this.bookBorrowSessionsRepository.save({});
+
+    let joinBooks = [...reservedBooks, ...willBorrowBooks];
+
+    for (let index in joinBooks) {
+      this.makeBookUnavailableForUser(
+        joinBooks[index],
         user,
-      )) &&
-      !this.businessValidateService.isUserReachBorrowLimit(
-        await user.books,
-        books.length,
-      )
-    ) {
-      for (let index in books) {
-        if (
-          !this.businessValidateService.isBookAvailableForUser(
-            books[index],
-            userId,
-          )
-        )
-          throw new HttpException(
-            { bookId: books[index].bookId, message: 'book not available' },
-            HttpStatus.CONFLICT,
-          );
-      }
-
-      let resultPromises: Promise<DeepPartial<BookBorrowRecord>>[] = [];
-
-      const now = new Date();
-      let newSession = await this.bookBorrowSessionsRepository.save({});
-
-      for (let index in books) {
-        this.makeBookUnavailableForUser(
-          books[index],
-          user,
-          parseInt(borrowDue),
-          now,
-        );
-        resultPromises = [
-          ...resultPromises,
-          this.bookBorrowRecordsRepository.save({
-            bookId: bookIds[index],
-            userId,
-            borrowSessionId: newSession._id,
-            createdDate: now,
-            bookName: books[index].name,
-            authorName: books[index].author,
-            genreNames: books[index].genres.map((e) => e.name),
-          }),
-        ];
-        this.bookBorrowReturnHistoriesRepository.save({
-          userId: userId,
-          author: books[index].author,
-          bookId: books[index].bookId,
-          bookName: books[index].name,
-          borrowDate: now,
+        parseInt(borrowDue),
+        now,
+      );
+      resultPromises = [
+        ...resultPromises,
+        this.bookBorrowRecordsRepository.save({
+          bookId: bookIds[index],
+          userId,
           borrowSessionId: newSession._id,
-          returnDate: null,
-          returnSessionId: null,
-          fine: null,
-          numberOfPassDueDays: null,
-        });
-        if (parseInt(index) == books.length - 1) {
-          newSession.username = user.username;
-          newSession.name = user.name;
-          newSession.quantity = books.length;
-          await this.bookBorrowSessionsRepository.save(newSession);
-        }
+          createdDate: now,
+          bookName: willBorrowBooks[index].name,
+          authorName: willBorrowBooks[index].author,
+          genreNames: willBorrowBooks[index].genres.map((e) => e.name),
+        }),
+      ];
+      this.bookBorrowReturnHistoriesRepository.save({
+        userId: userId,
+        author: willBorrowBooks[index].author,
+        bookId: willBorrowBooks[index].bookId,
+        bookName: willBorrowBooks[index].name,
+        borrowDate: now,
+        borrowSessionId: newSession._id,
+        returnDate: null,
+        returnSessionId: null,
+        fine: null,
+        numberOfPassDueDays: null,
+      });
+      if (parseInt(index) == willBorrowBooks.length - 1) {
+        newSession.username = user.username;
+        newSession.name = user.name;
+        newSession.quantity = willBorrowBooks.length;
+        await this.bookBorrowSessionsRepository.save(newSession);
       }
-
-      await this.booksRepository.save(books);
-      await this.usersRepository.save(user);
-      let result;
-      await Promise.all(resultPromises)
-        .then((records) => {
-          result = records;
-        })
-        .catch(() => {
-          throw new HttpException('Bad gateway', HttpStatus.BAD_GATEWAY);
-        });
-
-      return result;
     }
-    throw new HttpException('User not valid', HttpStatus.CONFLICT);
+
+    await this.booksRepository.save(joinBooks);
+    await this.usersRepository.save(user);
+    let result;
+    await Promise.all(resultPromises)
+      .then((records) => {
+        result = records;
+      })
+      .catch(() => {
+        throw new HttpException('Bad gateway', HttpStatus.BAD_GATEWAY);
+      });
+
+    return result;
   }
 
   private async makeBookUnavailableForUser(
