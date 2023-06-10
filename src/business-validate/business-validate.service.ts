@@ -70,7 +70,7 @@ export class BusinessValidateService {
         let date = book.borrowedDate || book.reservedDate;
         if (date!.getTime() > firstDayOfInterval.getTime()) count++;
       }
-      return count >= borrowMax;
+      return count > borrowMax;
     } else throw new HttpException('Bad gatewat', HttpStatus.BAD_GATEWAY);
   }
 
