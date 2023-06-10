@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  ConflictException,
   NotFoundException,
   BadGatewayException,
 } from '@nestjs/common';
@@ -90,7 +91,7 @@ export class ReserveService {
     books = books.filter((e) => this.busnessValidateService.isBookAvailable(e));
 
     if (books.length != bookIds.length) {
-      throw new NotFoundException('Some book not found or not available');
+      throw new ConflictException('Some book not available');
     }
 
     const rawReserveDay = this.rulesService.getRule('RESERVE_DAY');
