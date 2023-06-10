@@ -42,7 +42,7 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto, isAdminCreate: boolean = false) {
     let validPeriod = this.rulesService.getRule(
-      'VALID_PERIOD_BY_DAY_OF_USER_ACCOUNT',
+      'VALID_PERIOD_BY_MONTH_OF_USER_ACCOUNT',
     );
     if (!validPeriod) throw new Error();
     if (
@@ -69,7 +69,7 @@ export class UsersService {
       throw new ConflictException('User age not available');
 
     userProfile.validUntil.setDate(
-      userProfile.validUntil.getDate() + parseInt(validPeriod),
+      userProfile.validUntil.getDate() + parseInt(validPeriod) * 30,
     );
 
     const hashedPassword = bcrypt.hashSync(

@@ -80,14 +80,14 @@ export class RulesController {
     @Body() updateRuleDto: UpdateRuleDto,
   ) {
     await this.rulesService.updateRule(
-      'VALID_PERIOD_BY_DAY_OF_USER_ACCOUNT',
+      'VALID_PERIOD_BY_MONTH_OF_USER_ACCOUNT',
       updateRuleDto.value,
     );
   }
 
   @Get('/valid_period_of_user')
   getValidPeriodByDayOfUserAccount() {
-    return this.rulesService.getRule('VALID_PERIOD_BY_DAY_OF_USER_ACCOUNT');
+    return this.rulesService.getRule('VALID_PERIOD_BY_MONTH_OF_USER_ACCOUNT');
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
