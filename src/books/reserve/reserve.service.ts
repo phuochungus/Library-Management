@@ -80,8 +80,13 @@ export class ReserveService {
       where: {
         bookId: In(bookIds),
         reservedDate: IsNull(),
+        user: {
+          userId,
+        },
       },
     });
+
+    books = books.filter((e) => this.busnessValidateService.isBookAvailable(e));
 
     if (books.length != bookIds.length) {
       throw new NotFoundException('Some book not found or not available');
