@@ -32,6 +32,7 @@ export class ReserveService {
         (await this.busnessValidateService.isUserAbleToMakeBorrowRequest(
           user,
         )) &&
+        this.busnessValidateService.isBookAvailable(book) &&
         (this.busnessValidateService.isBookNotBorrowedAndNotReserved(book) ||
           this.busnessValidateService.isBookReserveForThisUser(userId, book))
       ) {
