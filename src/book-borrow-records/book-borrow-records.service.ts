@@ -24,6 +24,7 @@ import { RulesService } from '../rules/rules.service';
 import { CreateBookBorrowRecordDto } from './dto/create-book-borrow-record.dto';
 import { NotFoundError } from 'rxjs';
 import _ from 'lodash';
+import { join } from 'path';
 
 @Injectable()
 export class BookBorrowRecordsService {
@@ -133,7 +134,7 @@ export class BookBorrowRecordsService {
         fine: null,
         numberOfPassDueDays: null,
       });
-      if (parseInt(index) == willBorrowBooks.length - 1) {
+      if (parseInt(index) == joinBooks.length - 1) {
         newSession.username = user.username;
         newSession.name = user.name;
         newSession.quantity = joinBooks.length;
