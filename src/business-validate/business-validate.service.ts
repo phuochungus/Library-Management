@@ -9,7 +9,7 @@ import User from '../entities/User';
 import { RulesService } from '../rules/rules.service';
 import { isInt } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThan, MongoRepository, MoreThanOrEqual } from 'typeorm';
+import { MongoRepository } from 'typeorm';
 import BookBorrowSession from '../entities/BookBorrowSession';
 
 @Injectable()
