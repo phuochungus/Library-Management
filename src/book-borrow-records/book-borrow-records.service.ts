@@ -22,9 +22,7 @@ import BookBorrowSession from '../entities/BookBorrowSession';
 import User from '../entities/User';
 import { RulesService } from '../rules/rules.service';
 import { CreateBookBorrowRecordDto } from './dto/create-book-borrow-record.dto';
-import { NotFoundError } from 'rxjs';
 import _ from 'lodash';
-import { join } from 'path';
 
 @Injectable()
 export class BookBorrowRecordsService {
@@ -52,7 +50,9 @@ export class BookBorrowRecordsService {
     });
 
     if (!user) throw new NotFoundException('User not found or deleted');
-    if (!this.businessValidateService.isUserAbleToMakeBorrowRequest(user))
+    if (
+      !(await this.businessValidateService.isUserAbleToMakeBorrowRequest(user))
+    )
       throw new ConflictException(
         'User unable to borrow request due to violate some rules or have pass due books',
       );
