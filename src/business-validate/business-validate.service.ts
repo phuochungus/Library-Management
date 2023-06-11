@@ -98,7 +98,6 @@ export class BusinessValidateService {
       for (let session of sessions) {
         count += session.quantity;
       }
-      console.log(count);
       return count > borrowMax;
     } else throw new HttpException('Bad gatewat', HttpStatus.BAD_GATEWAY);
   }

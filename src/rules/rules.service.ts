@@ -18,7 +18,6 @@ export class RulesService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    console.log('listen to mongodb');
     this.entityManager.watch(Rule).on('change', async (changeEvent) => {
       await this.handleChangeEvent(changeEvent);
     });
