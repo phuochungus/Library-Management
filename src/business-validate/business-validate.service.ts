@@ -8,19 +8,29 @@ import Book from '../entities/Book';
 import User from '../entities/User';
 import { RulesService } from '../rules/rules.service';
 import { isInt } from 'class-validator';
+import { InjectRepository } from '@nestjs/typeorm';
+import { LessThan, MongoRepository, MoreThanOrEqual } from 'typeorm';
+import BookBorrowSession from '../entities/BookBorrowSession';
 
 @Injectable()
 export class BusinessValidateService {
-  constructor(private rulesListenerService: RulesService) {}
+  constructor(
+    private rulesListenerService: RulesService,
+    @InjectRepository(BookBorrowSession, 'mongoDB')
+    private bookBorrowSessionsRepository: MongoRepository<BookBorrowSession>,
+  ) {}
 
-  async isUserAbleToMakeBorrowRequest(user: User): Promise<boolean> {
+  async isUserAbleToMakeBorrowRequest(
+    user: User,
+    booksInReqest = 0,
+  ): Promise<boolean> {
     if (!user) return false;
     const userBooks = await user.books;
 
     if (!this.isUserAgeValid(user.birth))
       throw new ConflictException('User age not supported');
 
-    if (this.isUserReachBorrowLimit(userBooks))
+    if (await this.isUserReachBorrowLimit(user, booksInReqest))
       throw new ConflictException(
         'User reach borrow limit within this interval of time, try again later',
       );
@@ -51,31 +61,51 @@ export class BusinessValidateService {
     throw new HttpException('Bad gatewat', HttpStatus.BAD_GATEWAY);
   }
 
-  isUserReachBorrowLimit(
-    books: Book[],
-    numberOfBookAboutTobeBorrow = 0,
-  ): boolean {
+  async isUserReachBorrowLimit(
+    user: User,
+    booksInReqest = 0,
+  ): Promise<boolean> {
     const borrowMaxValue = this.rulesListenerService.getRule('BORROW_MAX');
     const borrowDueValue = this.rulesListenerService.getRule('BORROW_INTERVAL');
     if (borrowMaxValue && borrowDueValue) {
       const borrowMax = parseInt(borrowMaxValue);
       const borrowInterval = parseInt(borrowDueValue);
-      let count = numberOfBookAboutTobeBorrow;
+      let count = booksInReqest;
+      const now = Date.now();
       const firstDayOfInterval = this.findFirstDayInInterval(
-        Date.now(),
+        user.firstBorrowDate?.getTime() || now,
+        now,
         borrowInterval,
       );
+
+      const books = await user.books;
 
       for (let book of books) {
         let date = book.borrowedDate || book.reservedDate;
         if (date!.getTime() > firstDayOfInterval.getTime()) count++;
       }
+
+      let sessions = await this.bookBorrowSessionsRepository.find({
+        where: {
+          username: user.username,
+        },
+      });
+
+      sessions = sessions.filter(
+        (e) => e.createdDate.getTime() >= firstDayOfInterval.getTime(),
+      );
+
+      for (let session of sessions) {
+        count += session.quantity;
+      }
+
       return count > borrowMax;
     } else throw new HttpException('Bad gatewat', HttpStatus.BAD_GATEWAY);
   }
 
   findFirstDayInInterval(
-    anyDayFromIntervalInMilisec: number,
+    start: number,
+    milisecOfIntervalToFind: number,
     interval: number,
   ) {
     if (!isInt(interval))
@@ -83,8 +113,8 @@ export class BusinessValidateService {
     const MILISECOND_IN_ONE_DAY = 24 * 60 * 60 * 1000;
     const MILISECOND_IN_INTERVAL = interval * MILISECOND_IN_ONE_DAY;
     const milisecPassedInInterval =
-      anyDayFromIntervalInMilisec % MILISECOND_IN_INTERVAL;
-    return new Date(anyDayFromIntervalInMilisec - milisecPassedInInterval);
+      (milisecOfIntervalToFind - start) % MILISECOND_IN_INTERVAL;
+    return new Date(milisecOfIntervalToFind - milisecPassedInInterval);
   }
 
   isUserAccountValid(validUntil: Date): boolean {

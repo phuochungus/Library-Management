@@ -63,4 +63,7 @@ export default class User extends Person implements TimeStampImp {
 
   @DeleteDateColumn()
   deleteDate?: Date;
+
+  @Column({ nullable: true })
+  firstBorrowDate?: Date;
 }

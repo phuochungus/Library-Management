@@ -50,8 +50,22 @@ export class BookBorrowRecordsService {
     });
 
     if (!user) throw new NotFoundException('User not found or deleted');
+
+    let willBorrowBooks = await this.booksRepository.find({
+      where: {
+        bookId: In(bookIds),
+        user: IsNull(),
+        borrowedDate: IsNull(),
+        reservedDate: IsNull(),
+      },
+      relations: { user: true, genres: true },
+    });
+
     if (
-      !(await this.businessValidateService.isUserAbleToMakeBorrowRequest(user))
+      !(await this.businessValidateService.isUserAbleToMakeBorrowRequest(
+        user,
+        willBorrowBooks.length,
+      ))
     )
       throw new ConflictException(
         'User unable to borrow request due to violate some rules or have pass due books',
@@ -63,16 +77,6 @@ export class BookBorrowRecordsService {
         user: Not(IsNull()),
         borrowedDate: IsNull(),
         reservedDate: Not(IsNull()),
-      },
-      relations: { user: true, genres: true },
-    });
-
-    let willBorrowBooks = await this.booksRepository.find({
-      where: {
-        bookId: In(bookIds),
-        user: IsNull(),
-        borrowedDate: IsNull(),
-        reservedDate: IsNull(),
       },
       relations: { user: true, genres: true },
     });
@@ -143,6 +147,7 @@ export class BookBorrowRecordsService {
     }
 
     await this.booksRepository.save(joinBooks);
+    if (!user.firstBorrowDate) user.firstBorrowDate = now;
     await this.usersRepository.save(user);
     let result;
     await Promise.all(resultPromises)

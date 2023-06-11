@@ -17,5 +17,5 @@ export default class BookBorrowSession implements MongoEntity {
   name: string;
 
   @CreateDateColumn()
-  createdDate: string;
+  createdDate: Date;
 }
