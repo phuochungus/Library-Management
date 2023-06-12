@@ -36,7 +36,11 @@ export class ReserveService {
         )) &&
         this.busnessValidateService.isBookAvailable(book) &&
         (this.busnessValidateService.isBookNotBorrowedAndNotReserved(book) ||
-          this.busnessValidateService.isBookReserveForThisUser(userId, book))
+          this.busnessValidateService.isBookReserveForThisUser(userId, book)) &&
+        (await this.busnessValidateService.isUserAbleToMakeBorrowRequest(
+          user,
+          1,
+        ))
       ) {
         const reserveDay = this.rulesService.getRule('RESERVE_DAY');
         if (!reserveDay)
