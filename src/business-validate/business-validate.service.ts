@@ -98,6 +98,8 @@ export class BusinessValidateService {
         },
       });
 
+      console.log('first day of interval: ' + firstDayOfInterval.toString());
+
       sessions = sessions.filter(
         (e) => e.createdDate.getTime() >= firstDayOfInterval.getTime(),
       );
