@@ -111,7 +111,7 @@ export class BusinessValidateService {
       });
 
       reservingBooks = reservingBooks.filter(
-        (e) => e.dueDate!.getTime() < Date.now(),
+        (e) => e.dueDate!.getTime() >= Date.now(),
       );
       return count + reservingBooks.length > borrowMax;
     } else throw new HttpException('Bad gatewat', HttpStatus.BAD_GATEWAY);
