@@ -86,7 +86,7 @@ export class BusinessValidateService {
 
       for (let book of books) {
         let date = book.borrowedDate || book.reservedDate;
-        if (date!.getTime() > firstDayOfInterval.getTime()) count++;
+        if (date!.getTime() >= firstDayOfInterval.getTime()) count++;
       }
 
       console.log('after count borrowing books: ' + count);

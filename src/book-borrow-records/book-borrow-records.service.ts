@@ -64,6 +64,9 @@ export class BookBorrowRecordsService {
       relations: { user: true, genres: true },
     });
 
+    console.log('book not reserved: ');
+    console.log(willBorrowBooks);
+
     if (
       !(await this.businessValidateService.isUserAbleToMakeBorrowRequest(
         user,
