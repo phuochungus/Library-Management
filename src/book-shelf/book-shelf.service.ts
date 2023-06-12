@@ -45,7 +45,15 @@ export class BookShelfService {
   async findAllFromUser(userId: string) {
     const user = await this.usersRepository.findOneBy({ userId });
     if (!user) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
-    return await user.bookShelf;
+    let userBooks = await user.bookShelf;
+    return userBooks.map((e) => {
+      return {
+        ...e,
+        isAvailable:
+          this.businessValidateService.isBookAvailable(e) ||
+          this.businessValidateService.isBookAvailableForUser(e, userId),
+      };
+    });
   }
   async remove(userId: string, bookIds: string[]) {
     let user = await this.usersRepository.findOneBy({

@@ -138,12 +138,14 @@ export class BusinessValidateService {
         this.isBookReserveForThisUser(userId, book)
       )
     )
-      throw new ConflictException('Book not available for user');
+      return false;
+    // throw new ConflictException('Book not available for user');
 
     if (!this.isBookPublicationYearValid(book.publishYear))
-      throw new ConflictException(
-        'Book publication year too old, can not borrow such old book for presevation policy',
-      );
+      // throw new ConflictException(
+      //   'Book publication year too old, can not borrow such old book for presevation policy',
+      // );
+      return false;
     return true;
   }
 

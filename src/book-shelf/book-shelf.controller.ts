@@ -3,9 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Param,
   Delete,
-  ParseUUIDPipe,
   UseGuards,
   Req,
 } from '@nestjs/common';
