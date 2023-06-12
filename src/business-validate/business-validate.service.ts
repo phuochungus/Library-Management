@@ -9,7 +9,7 @@ import User from '../entities/User';
 import { RulesService } from '../rules/rules.service';
 import { isInt } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MongoRepository } from 'typeorm';
+import { IsNull, MongoRepository, Not, Repository } from 'typeorm';
 import BookBorrowSession from '../entities/BookBorrowSession';
 
 @Injectable()
@@ -18,6 +18,7 @@ export class BusinessValidateService {
     private rulesListenerService: RulesService,
     @InjectRepository(BookBorrowSession, 'mongoDB')
     private bookBorrowSessionsRepository: MongoRepository<BookBorrowSession>,
+    @InjectRepository(Book) private booksRepository: Repository<Book>,
   ) {}
 
   async isUserAbleToMakeBorrowRequest(
@@ -98,7 +99,21 @@ export class BusinessValidateService {
       for (let session of sessions) {
         count += session.quantity;
       }
-      return count > borrowMax;
+
+      let reservingBooks = await this.booksRepository.find({
+        where: {
+          user: {
+            userId: user.userId,
+          },
+          borrowedDate: IsNull(),
+          reservedDate: Not(IsNull()),
+        },
+      });
+
+      reservingBooks = reservingBooks.filter(
+        (e) => e.dueDate!.getTime() < Date.now(),
+      );
+      return count + reservingBooks.length > borrowMax;
     } else throw new HttpException('Bad gatewat', HttpStatus.BAD_GATEWAY);
   }
 
