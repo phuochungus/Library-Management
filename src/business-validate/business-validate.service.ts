@@ -89,6 +89,7 @@ export class BusinessValidateService {
         if (date!.getTime() >= firstDayOfInterval.getTime()) count++;
       }
 
+      console.log(books);
       console.log('after count borrowing books: ' + count);
 
       let sessions = await this.bookBorrowSessionsRepository.find({
@@ -104,6 +105,7 @@ export class BusinessValidateService {
       for (let session of sessions) {
         count += session.quantity;
       }
+      console.log(sessions);
       console.log('after count borrowed books: ' + count);
 
       let reservingBooks = await this.booksRepository.find({
@@ -120,6 +122,7 @@ export class BusinessValidateService {
         (e) => e.dueDate!.getTime() >= Date.now(),
       );
 
+      console.log(reservingBooks);
       console.log(
         'after count reserving books: ' + (count + reservingBooks.length),
       );
