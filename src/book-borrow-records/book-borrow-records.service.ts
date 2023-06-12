@@ -22,7 +22,7 @@ import BookBorrowSession from '../entities/BookBorrowSession';
 import User from '../entities/User';
 import { RulesService } from '../rules/rules.service';
 import { CreateBookBorrowRecordDto } from './dto/create-book-borrow-record.dto';
-import _ from 'lodash';
+import { difference } from 'lodash';
 
 @Injectable()
 export class BookBorrowRecordsService {
@@ -82,14 +82,14 @@ export class BookBorrowRecordsService {
     });
 
     if (willBorrowBooks.length + reservedBooks.length != bookIds.length) {
-      let diff = _.difference(
-        willBorrowBooks.map((e) => e.bookId),
-        bookIds,
-      );
+      let diff = difference(bookIds, [
+        ...willBorrowBooks.map((e) => e.bookId),
+        ...reservedBooks,
+      ]);
       if (diff.length > 0)
         throw new ConflictException({
           bookId: diff[0],
-          message: 'book not available',
+          message: 'book not available or not found',
         });
     }
 
