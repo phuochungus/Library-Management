@@ -133,6 +133,7 @@ export class BookReturnRecordsService {
     book.user = null;
     book.borrowedDate = null;
     book.dueDate = null;
+    book.reservedDate = null;
   }
 
   async findAll() {
