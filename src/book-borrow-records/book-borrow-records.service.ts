@@ -49,6 +49,9 @@ export class BookBorrowRecordsService {
       where: { userId },
     });
 
+    console.log('user: ');
+    console.log(user);
+
     if (!user) throw new NotFoundException('User not found or deleted');
 
     let willBorrowBooks = await this.booksRepository.find({

@@ -70,8 +70,11 @@ export class BusinessValidateService {
     const borrowDueValue = this.rulesListenerService.getRule('BORROW_INTERVAL');
     if (borrowMaxValue && borrowDueValue) {
       const borrowMax = parseInt(borrowMaxValue);
+      console.log('borrow Max: ' + borrowMax);
       const borrowInterval = parseInt(borrowDueValue);
+      console.log('borrow Interval: ' + borrowDueValue);
       let count = booksInReqest;
+      console.log('inital count: ' + count);
       const now = Date.now();
       const firstDayOfInterval = this.findFirstDayInInterval(
         user.firstBorrowDate?.getTime() || now,
@@ -86,6 +89,8 @@ export class BusinessValidateService {
         if (date!.getTime() > firstDayOfInterval.getTime()) count++;
       }
 
+      console.log('after count borrowing books: ' + count);
+
       let sessions = await this.bookBorrowSessionsRepository.find({
         where: {
           username: user.username,
@@ -99,6 +104,7 @@ export class BusinessValidateService {
       for (let session of sessions) {
         count += session.quantity;
       }
+      console.log('after count borrowed books: ' + count);
 
       let reservingBooks = await this.booksRepository.find({
         where: {
@@ -113,6 +119,12 @@ export class BusinessValidateService {
       reservingBooks = reservingBooks.filter(
         (e) => e.dueDate!.getTime() >= Date.now(),
       );
+
+      console.log(
+        'after count reserving books: ' + (count + reservingBooks.length),
+      );
+
+      console.log('comparing to borrow max: ' + borrowMax);
       return count + reservingBooks.length > borrowMax;
     } else throw new HttpException('Bad gatewat', HttpStatus.BAD_GATEWAY);
   }
