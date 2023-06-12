@@ -146,6 +146,7 @@ export class BusinessValidateService {
       //   'Book publication year too old, can not borrow such old book for presevation policy',
       // );
       return false;
+
     return true;
   }
 
