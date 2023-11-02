@@ -54,8 +54,10 @@ export class AdminsService {
     });
     if (!admin) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
 
-    admin = { ...admin, ...updateAdminDto };
-    await this.adminsRepository.save(admin);
+    await this.adminsRepository.save({
+      ...admin,
+      ...updateAdminDto,
+    });
   }
 
   async remove(id: string) {

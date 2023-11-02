@@ -1,11 +1,11 @@
 import { Column, CreateDateColumn, Entity, ObjectIdColumn } from 'typeorm';
 import MongoEntity from './MongoEntity';
-import { ObjectID } from 'mongodb';
+import { ObjectId } from 'mongodb';
 
 @Entity()
 export default class BookBorrowRecord implements MongoEntity {
-  @ObjectIdColumn()
-  _id: ObjectID;
+  @ObjectIdColumn({ primary: true })
+  _id: ObjectId;
 
   @Column()
   bookId: string;
@@ -13,8 +13,8 @@ export default class BookBorrowRecord implements MongoEntity {
   @Column()
   userId: string;
 
-  @Column()
-  borrowSessionId: ObjectID;
+  @ObjectIdColumn()
+  borrowSessionId: ObjectId;
 
   @Column()
   bookName: string;

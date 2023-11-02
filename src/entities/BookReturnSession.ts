@@ -1,18 +1,11 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  MongoClient,
-  ObjectID,
-  ObjectIdColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, ObjectIdColumn } from 'typeorm';
 import MongoEntity from './MongoEntity';
-import { Collection } from 'mongoose';
+import { ObjectId } from 'mongodb';
 
 @Entity()
 export default class BookReturnSession implements MongoEntity {
-  @ObjectIdColumn()
-  _id: ObjectID;
+  @ObjectIdColumn({ primary: true })
+  _id: ObjectId;
 
   @Column()
   quantity: number;

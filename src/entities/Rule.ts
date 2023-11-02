@@ -2,13 +2,16 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ObjectID,
+  ObjectId,
   ObjectIdColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
 export default class Rule {
+  @ObjectIdColumn({ primary: true })
+  _id: ObjectId;
+
   @Column()
   about: string;
 
@@ -20,7 +23,4 @@ export default class Rule {
 
   @UpdateDateColumn({ type: 'timestamp', nullable: true })
   updatedAt: Date | null;
-
-  @ObjectIdColumn()
-  _id: ObjectID;
 }

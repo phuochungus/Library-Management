@@ -71,9 +71,9 @@ export class ReserveService {
 
     if (!book) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     if (this.busnessValidateService.isBookReserveForThisUser(userId, book)) {
-      book.user = null;
-      book.dueDate = null;
-      book.reservedDate = null;
+      book.user = undefined;
+      book.dueDate = undefined;
+      book.reservedDate = undefined;
       await this.booksRepository.save(book);
     }
   }
@@ -133,9 +133,9 @@ export class ReserveService {
     });
 
     books.forEach((book) => {
-      book.user = null;
-      book.reservedDate = null;
-      book.dueDate = null;
+      book.user = undefined;
+      book.reservedDate = undefined;
+      book.dueDate = undefined;
     });
     return await this.booksRepository.save(books);
   }

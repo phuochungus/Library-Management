@@ -53,11 +53,8 @@ import { Module } from '@nestjs/common';
     BookBorrowSessionsModule,
     BookBorrowReturnHistoriesModule,
     TypeOrmModule.forRoot({
-      type: 'mysql',
+      type: 'postgres',
       url: process.env.DATABASE_URL,
-      ssl: {
-        rejectUnauthorized: true,
-      },
       entities: [Book, User, Admin, Genre],
       synchronize: true,
     }),

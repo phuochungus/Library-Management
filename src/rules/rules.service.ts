@@ -26,12 +26,7 @@ export class RulesService implements OnModuleInit {
 
   private currentRules: Rule[] = [];
 
-  private async handleChangeEvent(changeEvent: {
-    operationType: string;
-    fullDocument: Rule;
-    documentKey: any;
-    updateDescription: { updatedFields: any };
-  }) {
+  private async handleChangeEvent(changeEvent: any) {
     if (changeEvent.operationType == 'insert') {
       this.currentRules.push(changeEvent.fullDocument);
     }

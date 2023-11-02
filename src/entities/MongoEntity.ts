@@ -1,5 +1,5 @@
-import {ObjectID} from "mongodb";
+import { ObjectId } from 'mongodb';
 
 export default interface MongoEntity {
-  _id: ObjectID;
+  _id: ObjectId;
 }

@@ -1,11 +1,11 @@
 import { Column, CreateDateColumn, Entity, ObjectIdColumn } from 'typeorm';
 import MongoEntity from './MongoEntity';
-import { ObjectID } from 'mongodb';
+import { ObjectId } from 'mongodb';
 
-@Entity()
+@Entity({ engine: 'mongodb' })
 export default class BookBorrowSession implements MongoEntity {
-  @ObjectIdColumn()
-  _id: ObjectID;
+  @ObjectIdColumn({ primary: true })
+  _id: ObjectId;
 
   @Column()
   quantity: number;

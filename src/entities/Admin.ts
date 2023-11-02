@@ -1,4 +1,6 @@
 import {
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
@@ -22,12 +24,16 @@ export default class Admin extends Person implements TimeStampImp {
   @UpdateDateColumn()
   updatedDate: Date;
 
-  @DeleteDateColumn({ select: false })
+  @DeleteDateColumn({ name: 'deleteDate' })
   deleteDate?: Date;
 
-  @Column({
-    generatedType: 'VIRTUAL',
-    asExpression: 'IF(deleteDate IS NULL, true, false)',
-  })
+  @Column()
   isActive: boolean = true;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  checkIsActive() {
+    if (!this.deleteDate) this.isActive = true;
+    this.isActive = false;
+  }
 }

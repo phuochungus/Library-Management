@@ -37,7 +37,7 @@ export default class Book implements TimeStampImp {
     cascade: true,
     eager: true,
   })
-  user: User | null;
+  user?: User;
 
   @ManyToMany(() => Genre, (Genre) => Genre.books, {
     eager: true,
@@ -54,14 +54,14 @@ export default class Book implements TimeStampImp {
   })
   users: Promise<User[]>;
 
-  @Column({ type: 'datetime', nullable: true })
-  borrowedDate: Date | null;
+  @Column({ nullable: true })
+  borrowedDate?: Date;
 
-  @Column({ type: 'datetime', nullable: true })
-  reservedDate: Date | null;
+  @Column({ nullable: true })
+  reservedDate?: Date;
 
-  @Column({ type: 'datetime', nullable: true })
-  dueDate: Date | null;
+  @Column({ nullable: true })
+  dueDate?: Date;
 
   @CreateDateColumn()
   createdDate: Date;
@@ -69,6 +69,6 @@ export default class Book implements TimeStampImp {
   @UpdateDateColumn()
   updatedDate: Date;
 
-  @DeleteDateColumn({ select: false })
+  @DeleteDateColumn()
   deleteDate?: Date;
 }

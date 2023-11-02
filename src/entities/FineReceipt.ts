@@ -2,16 +2,16 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ObjectID,
   ObjectIdColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import MongoEntity from './MongoEntity';
+import { ObjectId } from 'mongodb';
 
 @Entity()
 export default class FineReceipt implements MongoEntity {
-  @ObjectIdColumn()
-  _id: ObjectID;
+  @ObjectIdColumn({ primary: true })
+  _id: ObjectId;
 
   @Column()
   userId: string;

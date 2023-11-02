@@ -1,10 +1,9 @@
-import { Column, Entity, ObjectIdColumn } from 'typeorm';
-import { ObjectID } from 'mongodb';
+import { Column, Entity, ObjectId, ObjectIdColumn } from 'typeorm';
 
-@Entity()
+@Entity({ engine: 'mongodb' })
 export default class BookBorrowReturnHistory {
-  @ObjectIdColumn()
-  _id: ObjectID;
+  @ObjectIdColumn({ primary: true })
+  _id: ObjectId;
 
   @Column()
   userId: string;
@@ -21,14 +20,14 @@ export default class BookBorrowReturnHistory {
   @Column()
   borrowDate: Date;
 
-  @Column()
-  borrowSessionId: ObjectID;
+  @ObjectIdColumn({ nullable: true })
+  returnSessionId?: ObjectId;
+
+  @ObjectIdColumn()
+  borrowSessionId: ObjectId;
 
   @Column({ default: null })
   returnDate: Date | null;
-
-  @Column({ default: null })
-  returnSessionId: ObjectID | null;
 
   @Column({ default: null })
   fine: number | null;

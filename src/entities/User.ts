@@ -1,4 +1,6 @@
 import {
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
@@ -49,10 +51,10 @@ export default class User extends Person implements TimeStampImp {
   })
   bookShelf: Promise<Book[]>;
 
-  @Column({
-    generatedType: 'VIRTUAL',
-    asExpression: 'IF(deleteDate IS NULL, true, false)',
-  })
+  @DeleteDateColumn()
+  deleteDate?: Date;
+
+  @Column()
   isActive: boolean = true;
 
   @CreateDateColumn()
@@ -61,9 +63,13 @@ export default class User extends Person implements TimeStampImp {
   @UpdateDateColumn()
   updatedDate: Date;
 
-  @DeleteDateColumn()
-  deleteDate?: Date;
-
   @Column({ nullable: true })
   firstBorrowDate?: Date;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  checkIsActive() {
+    if (!this.deleteDate) this.isActive = true;
+    this.isActive = false;
+  }
 }

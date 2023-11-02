@@ -140,7 +140,6 @@ export class BookBorrowRecordsService {
         borrowDate: now,
         borrowSessionId: newSession._id,
         returnDate: null,
-        returnSessionId: null,
         fine: null,
         numberOfPassDueDays: null,
       });

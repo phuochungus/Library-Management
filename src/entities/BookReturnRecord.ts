@@ -1,10 +1,13 @@
 import { Column, CreateDateColumn, Entity, ObjectIdColumn } from 'typeorm';
 import MongoEntity from './MongoEntity';
 import { IsNotEmpty } from 'class-validator';
-import { ObjectID } from 'mongodb';
+import { ObjectId } from 'mongodb';
 
 @Entity()
 export default class BookReturnRecord implements MongoEntity {
+  @ObjectIdColumn({ primary: true })
+  _id: ObjectId;
+
   @Column()
   @IsNotEmpty()
   bookId: string;
@@ -18,8 +21,8 @@ export default class BookReturnRecord implements MongoEntity {
   @Column()
   passDue: number = 0;
 
-  @Column()
-  returnSessionId: ObjectID;
+  @ObjectIdColumn()
+  returnSessionId: ObjectId;
 
   @Column()
   bookName: string;
@@ -32,7 +35,4 @@ export default class BookReturnRecord implements MongoEntity {
 
   @CreateDateColumn()
   createdDate: Date;
-
-  @ObjectIdColumn()
-  _id: ObjectID;
 }

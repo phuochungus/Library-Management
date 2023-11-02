@@ -130,10 +130,10 @@ export class BookReturnRecordsService {
   }
 
   private makeBookAvailable(book: Book) {
-    book.user = null;
-    book.borrowedDate = null;
-    book.dueDate = null;
-    book.reservedDate = null;
+    book.user = undefined;
+    book.borrowedDate = undefined;
+    book.dueDate = undefined;
+    book.reservedDate = undefined;
   }
 
   async findAll() {
