@@ -1,0 +1,8 @@
+services:
+  app:
+    build: .
+    image: library
+    ports:
+      - '3000:3000'
+    environment:
+      - MONGO_URL=your_mongo_db_url

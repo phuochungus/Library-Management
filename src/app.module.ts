@@ -54,22 +54,17 @@ import { Module } from '@nestjs/common';
     BookBorrowReturnHistoriesModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: process.env.MYSQL_HOST || 'localhost',
-      port: 3306,
-      username: process.env.MYSQL_USERNAME || 'root',
-      password: process.env.MYSQL_PASSWORD || process.env.LOCAL_PASSWORD,
-      database: process.env.MYSQL_DATABASE || 'library2',
+      url: process.env.DATABASE_URL,
+      ssl: {
+        rejectUnauthorized: true,
+      },
       entities: [Book, User, Admin, Genre],
       synchronize: true,
     }),
     TypeOrmModule.forRoot({
       type: 'mongodb',
       name: 'mongoDB',
-      url:
-        'mongodb+srv://dev:' +
-        process.env.MONGO_PASSWORD +
-        '@sandbox.bffmayt.mongodb.net/library2?retryWrites=true&w=majority',
-
+      url: process.env.MONGO_URL,
       database: 'library2',
       useNewUrlParser: true,
       useUnifiedTopology: true,
