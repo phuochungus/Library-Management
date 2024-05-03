@@ -37,7 +37,7 @@ export class BookBorrowRecordsService {
     @InjectRepository(User) private usersRepository: Repository<User>,
     private businessValidateService: BusinessValidateService,
     private rulesService: RulesService,
-  ) {}
+  ) { }
 
   async makingBorrowTransaction(
     createBookBorrowRecordDto: CreateBookBorrowRecordDto,
@@ -159,7 +159,8 @@ export class BookBorrowRecordsService {
       .then((records) => {
         result = records;
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error(error);
         throw new HttpException('Bad gateway', HttpStatus.BAD_GATEWAY);
       });
 

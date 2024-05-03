@@ -20,7 +20,7 @@ export class ReportsService {
     private genresRepository: Repository<Genre>,
     @InjectRepository(Book)
     private booksRepository: Repository<Book>,
-  ) {}
+  ) { }
 
   async getReportBorrowByGenres(month: number, year: number) {
     let result: Array<{ bookId: string }> =
@@ -104,7 +104,9 @@ export class ReportsService {
           genresName: (await book.genres).map((genre) => genre.name),
         });
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   async getReportLateReturn(borrowMonth: number, borrowYear: number) {

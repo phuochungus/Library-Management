@@ -20,6 +20,7 @@ export class GenresService {
       };
       await this.genresRepository.insert(genre);
     } catch (error) {
+      console.error(error);
       if (error.errno) {
         throw new HttpException('Genre already exist', HttpStatus.CONFLICT);
       }

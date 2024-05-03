@@ -36,7 +36,7 @@ export class UsersService {
     private configService: ConfigService,
     private mailService: MailService,
     private businessValidateService: BusinessValidateService,
-  ) {}
+  ) { }
 
   private salt = this.configService.get<string>('SALT');
 
@@ -74,7 +74,7 @@ export class UsersService {
 
     const hashedPassword = bcrypt.hashSync(
       createUserDto.password,
-      this.salt || 15,
+      bcrypt.genSaltSync(),
     );
     try {
       let result = await this.usersRepository.insert({
@@ -87,6 +87,7 @@ export class UsersService {
     } catch (error) {
       if (error.code == 'ER_DUP_ENTRY')
         throw new ConflictException('Email or username already taken');
+      console.error(error);
       throw new BadGatewayException();
     }
   }
@@ -152,6 +153,7 @@ export class UsersService {
         else if (user instanceof Admin)
           return await this.adminsRepository.save(user);
       } catch (error) {
+        console.error(error);
         if (error.errno == 1062)
           throw new ConflictException('Username or email already taken');
         throw error;
@@ -194,7 +196,7 @@ export class UsersService {
       );
     user.password = bcrypt.hashSync(
       updatePasswordDto.newPassword,
-      this.salt || 15,
+      bcrypt.genSaltSync(),
     );
     if (user instanceof User) await this.usersRepository.save(user);
     else if (user instanceof Admin) await this.adminsRepository.save(user);
@@ -208,7 +210,7 @@ export class UsersService {
 
     if (user) {
       let randomPassword = randomBytes(5).toString('hex');
-      let hashedPassword = bcrypt.hashSync(randomPassword, this.salt || 15);
+      let hashedPassword = bcrypt.hashSync(randomPassword, bcrypt.genSaltSync());
       user.password = hashedPassword;
       await this.usersRepository.save(user);
       this.mailService.sendNewPassword(resetPasswordDto.email, randomPassword);

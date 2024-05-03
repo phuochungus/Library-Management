@@ -15,12 +15,37 @@ export class RulesService implements OnModuleInit {
     private entityManager: MongoEntityManager,
     @InjectRepository(Rule, 'mongoDB')
     private rulesRepository: MongoRepository<Rule>,
-  ) {}
+  ) { }
+
+  private DEFAULT_RULES = [
+    ['BORROW_DUE', 7],
+    ['FINE_PER_DAY', 10000],
+    ['RESERVE_DAY', 1],
+    ['MINIMUM_AGE', 18],
+    ['MAXIMUM_AGE', 100],
+    ['BORROW_MAX', 7],
+    ['BORROW_INTERVAL', 1],
+    ['MAXIMUM_PUBLISH_YEAR_SINCE', 20],
+    ['VALID_PERIOD_BY_MONTH_OF_USER_ACCOUNT', 8]]
 
   async onModuleInit() {
     this.entityManager.watch(Rule).on('change', async (changeEvent) => {
       await this.handleChangeEvent(changeEvent);
     });
+    for (let rule of this.DEFAULT_RULES) {
+      let ruleDoc = await this.rulesRepository.findOne({
+        where: {
+          about: rule[0],
+        },
+      });
+      if (!ruleDoc) {
+        ruleDoc = new Rule();
+        ruleDoc.about = rule[0].toString();
+        ruleDoc.value = rule[1].toString();
+        await this.rulesRepository.save(ruleDoc);
+      }
+    }
+
     this.currentRules = await this.entityManager.find(Rule);
   }
 

@@ -27,7 +27,7 @@ export default class Admin extends Person implements TimeStampImp {
   @DeleteDateColumn({ name: 'deleteDate' })
   deleteDate?: Date;
 
-  @Column()
+  @Column({ default: true })
   isActive: boolean = true;
 
   @BeforeInsert()

@@ -17,10 +17,10 @@ export class AdminsService {
 
   async create(createAdminDto: CreateAdminDto) {
     try {
-      const salt = this.configService.get<string>('SALT');
+      // const salt = this.configService.get<string>('SALT');
       const adminProfile = {
         ...createAdminDto,
-        password: bcrypt.hashSync(createAdminDto.password, salt!),
+        password: bcrypt.hashSync(createAdminDto.password, bcrypt.genSaltSync()),
         adminId: uuidv4(),
       };
       await this.adminsRepository.insert(adminProfile);
@@ -31,6 +31,7 @@ export class AdminsService {
           HttpStatus.CONFLICT,
         );
       }
+      console.error(error);
       throw error;
     }
   }
