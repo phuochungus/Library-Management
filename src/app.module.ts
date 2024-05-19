@@ -53,12 +53,14 @@ import { Module } from '@nestjs/common';
     BookBorrowSessionsModule,
     BookBorrowReturnHistoriesModule,
     TypeOrmModule.forRoot({
+      logging: true,
       type: 'postgres',
       url: process.env.DATABASE_URL,
       entities: [Book, User, Admin, Genre],
       synchronize: true,
     }),
     TypeOrmModule.forRoot({
+      logging: true,
       type: 'mongodb',
       name: 'mongoDB',
       url: process.env.MONGO_URL,
