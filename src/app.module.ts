@@ -32,6 +32,7 @@ import BookBorrowReturnHistory from './entities/BookBorrowReturnHistory';
 import BookBorrowSession from './entities/BookBorrowSession';
 import { BookBorrowReturnHistoriesModule } from './book-borrow-return-histories/book-borrow-return-histories.module';
 import { Module } from '@nestjs/common';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -86,6 +87,7 @@ import { Module } from '@nestjs/common';
         },
       },
     }),
+    SeedModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailService],

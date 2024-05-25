@@ -28,10 +28,8 @@ export class RulesService implements OnModuleInit {
     ['MAXIMUM_PUBLISH_YEAR_SINCE', 20],
     ['VALID_PERIOD_BY_MONTH_OF_USER_ACCOUNT', 8]]
 
-  async onModuleInit() {
-    this.entityManager.watch(Rule).on('change', async (changeEvent) => {
-      await this.handleChangeEvent(changeEvent);
-    });
+
+  async createRules() {
     for (let rule of this.DEFAULT_RULES) {
       let ruleDoc = await this.rulesRepository.findOne({
         where: {
@@ -45,7 +43,12 @@ export class RulesService implements OnModuleInit {
         await this.rulesRepository.save(ruleDoc);
       }
     }
-
+  }
+  async onModuleInit() {
+    this.entityManager.watch(Rule).on('change', async (changeEvent) => {
+      await this.handleChangeEvent(changeEvent);
+    });
+    await this.createRules();
     this.currentRules = await this.entityManager.find(Rule);
   }
 

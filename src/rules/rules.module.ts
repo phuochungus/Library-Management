@@ -6,8 +6,8 @@ import { RulesService } from './rules.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Rule], 'mongoDB')],
+  controllers: [RulesController],
   providers: [RulesService],
   exports: [RulesService],
-  controllers: [RulesController],
 })
 export class RulesModule {}
